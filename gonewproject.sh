@@ -16,7 +16,7 @@ init_project() {
     fi
 
     # create repository remote 
-    if ! reporemotecreate.sh "$repo_name" "$description" "$visibility"; then
+    if ! repocreate.sh "$repo_name" "$description" "$visibility"; then
         error "Failed to create remote repository"
         return 1
     fi

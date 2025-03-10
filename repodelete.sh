@@ -1,6 +1,6 @@
 #!/bin/bash
 # Description: Deletes a remote GitHub repository after confirmation and permission checks
-# Usage: ./reporemotedelete.sh <repo-name> [force_delete] [owner]
+# Usage: ./repodelete.sh <repo-name> [force_delete] [owner]
 
 source functions.sh
 source githubutils.sh

@@ -175,6 +175,18 @@ func buildMarkdownTable(scripts []scriptInfo) string {
 		}
 	}
 
+	// Ensure description column has a reasonable minimum width
+	// to make it visually more prominent
+	minDescLength := 60
+	if maxDescLen < minDescLength {
+		maxDescLen = minDescLength
+	}
+
+	// También podemos limitar el ancho de la columna de uso
+	if maxUsageLen > 30 {
+		maxUsageLen = 30
+	}
+
 	// Build the table with proper spacing
 	var sb strings.Builder
 
