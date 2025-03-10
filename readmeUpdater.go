@@ -230,7 +230,8 @@ func (sr *scriptRunner) GenerateReadmeSection() (string, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString("## Available Scripts\n\n")
+	sb.WriteString("## Available Scripts\n")
+	sb.WriteString("<small>This section is automatically generated.</small>\n\n")
 	sb.WriteString(buildMarkdownTable(scripts))
 
 	return sb.String(), nil

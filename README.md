@@ -3,6 +3,7 @@ scripts commonly used by a developer in his daily workflow
 
 <!-- SCRIPTS_SECTION_START -->
 ## Available Scripts
+<small>This section is automatically generated.</small>
 
 | Script Name            | Description                                                                                                           | Usage                                                                    |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
