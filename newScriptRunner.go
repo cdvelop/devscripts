@@ -46,6 +46,77 @@ func NewScriptRunner(scriptsDir ...string) *scriptRunner {
 	}
 }
 
+// ScriptChain represents a chain of scripts to be executed in sequence
+type ScriptChain struct {
+	runner       *scriptRunner
+	scripts      []scriptExecution
+	lastExitCode int
+	lastOutput   string
+	lastError    error
+}
+
+// scriptExecution represents a single script execution with its arguments
+type scriptExecution struct {
+	name string
+	args []string
+}
+
+// Chain creates a new script execution chain
+func (sr *scriptRunner) Chain() *ScriptChain {
+	return &ScriptChain{
+		runner:       sr,
+		scripts:      make([]scriptExecution, 0),
+		lastExitCode: 0,
+		lastOutput:   "",
+		lastError:    nil,
+	}
+}
+
+// Then adds a script to the execution chain
+func (sc *ScriptChain) Then(scriptName string, args ...string) *ScriptChain {
+	sc.scripts = append(sc.scripts, scriptExecution{
+		name: scriptName,
+		args: args,
+	})
+	return sc
+}
+
+// Execute runs all scripts in the chain until one fails
+func (sc *ScriptChain) Execute() (int, string, error) {
+	var combinedOutput strings.Builder
+
+	for _, script := range sc.scripts {
+		exitCode, output, err := sc.runner.ExecScript(script.name, script.args...)
+		combinedOutput.WriteString(output)
+
+		sc.lastExitCode = exitCode
+		sc.lastOutput = output
+		sc.lastError = err
+
+		if err != nil || exitCode != 0 {
+			// Stop execution if a script fails
+			return exitCode, combinedOutput.String(), err
+		}
+	}
+
+	return 0, combinedOutput.String(), nil
+}
+
+// ExitCode returns the exit code of the last executed script
+func (sc *ScriptChain) ExitCode() int {
+	return sc.lastExitCode
+}
+
+// Output returns the output of the last executed script
+func (sc *ScriptChain) Output() string {
+	return sc.lastOutput
+}
+
+// Error returns the error of the last executed script
+func (sc *ScriptChain) Error() error {
+	return sc.lastError
+}
+
 // ExecScript executes a script and returns the exit code, output, and any error
 func (sr *scriptRunner) ExecScript(scriptName string, args ...string) (int, string, error) {
 
