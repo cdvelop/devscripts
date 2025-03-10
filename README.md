@@ -50,3 +50,86 @@ scripts commonly used by a developer in his daily workflow
 | `vpssetupsecurity.sh`  | VPS security setup script for Debian-based Linux servers                                                              | `sudo ./vpssetupsecurity.sh <username> <new_ssh_port>` |
 
 <!-- SCRIPTS_SECTION_END -->
+
+# DevScripts Package
+
+This package provides functionality for executing different types of scripts in a consistent way across different operating systems.
+
+## ScriptRunner
+
+The `ScriptRunner` handles the execution of scripts with appropriate interpreters based on file extensions.
+
+### Basic Usage
+
+```go
+import "path/to/devscripts"
+
+// Create a new script runner with default directory (current working directory)
+runner := devscripts.NewScriptRunner()
+
+// Or with a specific scripts directory
+runner := devscripts.NewScriptRunner("/path/to/scripts")
+
+// Execute a script with arguments
+exitCode, output, err := runner.ExecScript("myscript.sh", "arg1", "arg2")
+if err != nil {
+    // Handle error
+    fmt.Printf("Script execution failed: %v\n", err)
+    return
+}
+
+fmt.Printf("Script executed with exit code %d\n", exitCode)
+fmt.Printf("Output:\n%s\n", output)
+```
+
+### Chained Script Execution
+
+The package supports chained script execution, where scripts run sequentially and execution stops if any script fails:
+
+```go
+// Create a script chain
+exitCode, output, err := runner.Chain().
+    Then("script1.sh", "arg1").
+    Then("script2.py", "arg2", "arg3").
+    Then("script3.sh").
+    Execute()
+
+if err != nil {
+    fmt.Printf("Chain execution failed: %v\n", err)
+    return
+}
+
+fmt.Printf("All scripts executed successfully with combined output:\n%s\n", output)
+```
+
+### Accessing Individual Results
+
+You can also access the results of the last executed script in a chain:
+
+```go
+chain := runner.Chain().
+    Then("script1.sh").
+    Then("script2.sh")
+
+// Execute the chain
+chain.Execute()
+
+// Access results
+exitCode := chain.ExitCode()
+output := chain.Output()
+err := chain.Error()
+
+fmt.Printf("Last script exit code: %d\n", exitCode)
+fmt.Printf("Last script output: %s\n", output)
+if err != nil {
+    fmt.Printf("Last script error: %v\n", err)
+}
+```
+
+## Supported Script Types
+
+By default, the following script types are supported:
+- Shell scripts (.sh) - executed with bash
+- Python scripts (.py) - executed with python
+
+On Windows, Git Bash is used for executing shell scripts.
