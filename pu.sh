@@ -51,6 +51,14 @@ else
 
     # Construye la nueva etiqueta
     new_tag=$(echo "$latest_tag" | sed "s/$last_number$/$next_number/")
+    
+    # Verifica si la etiqueta ya existe
+    while git rev-parse "$new_tag" >/dev/null 2>&1; do
+        # Si la etiqueta existe, incrementar el número nuevamente
+        next_number=$((next_number + 1))
+        new_tag=$(echo "$latest_tag" | sed "s/$last_number$/$next_number/")
+        echo "La etiqueta ya existe, probando con $new_tag"
+    done
 fi
 
 execute "git tag $new_tag" "Error al crear la nueva etiqueta $current_folder." "nueva etiqueta $new_tag"
