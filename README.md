@@ -1,4 +1,4 @@
-# devscripts
+# DevScripts Package
 scripts commonly used by a developer in his daily workflow
 
 <!-- SCRIPTS_SECTION_START -->
@@ -51,9 +51,9 @@ scripts commonly used by a developer in his daily workflow
 
 <!-- SCRIPTS_SECTION_END -->
 
-# DevScripts Package
+## Use with Go
 
-This package provides functionality for executing different types of scripts in a consistent way across different operating systems.
+This package provides functionality for executing different types of scripts with Go in a consistent way across different operating systems.
 
 ## ScriptRunner
 
