@@ -10,6 +10,7 @@ scripts commonly used by a developer in his daily workflow
 | `backupwindows.sh`     | Performs backup operations using FreeFileSync on Windows systems                                                      | `./backupwindows.sh`           |
 | `changeremote.sh`      | Script to change the remote URL of a Git repository                                                                   | `./changeremote.sh https://github.com/username/repository.git` |
 | `delete.sh`            | Script to delete a file locally and track the deletion in Git                                                         | `./delete.sh filename.txt`     |
+| `doingmdfile.sh`       | Functions to work with doing.md file                                                                                  | `usage: source doingmdfile.sh` |
 | `functions.sh`         | Helper functions for git and script execution management                                                              | `source functions.sh`          |
 | `githubutils.sh`       | Utility functions for GitHub repository management and user information retrieval                                     | `source githubutils.sh`        |
 | `gitremtracking.sh`    | Removes files from git tracking both locally and remotely                                                             | `./gitremtracking.sh file1.txt file2.txt` |
@@ -19,7 +20,7 @@ scripts commonly used by a developer in his daily workflow
 | `gomodcheck.sh`        | Checks and updates Go module dependencies, runs tests and performs data race detection                                | `./gomodcheck.sh`              |
 | `gomodinit.sh`         | Script to initialize a Go module and create basic project structure                                                   | `./gomodinit.sh`               |
 | `gomodrename.sh`       | Rename a Go module and update all its references                                                                      | `./gomodrename.sh old-module-name new-module-name` |
-| `gomodtagupdate.sh`   | Updates Go module versions across all projects that use them                                                          | `./gomodtagupdate.sh <package-name> <new-version>` |
+| `gomodtagupdate.sh`    | Updates Go module versions across all projects that use them                                                          | `./gomodtagupdate.sh <package-name> <new-version>` |
 | `gomodutils.sh`        | Utility functions for managing Go modules and version updates                                                         | `source gomodutils.sh && update_single_go_module "mymodule" "v1.2.3"` |
 | `gonewproject.sh`      | Creates a new Go project with standard directory structure and initial files, sets up remote repository               | `./gonewproject.sh <repo-name> <description> [visibility]` |
 | `gopkgs.sh`            | Check if Go packages directory exists in current user's home                                                          | `./gopkgs.sh`                  |
