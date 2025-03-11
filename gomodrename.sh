@@ -22,8 +22,6 @@ go_mod_rename() {
         return 1
     fi
 
-
-
     local old_module="github.com/$gitHubOwner/$old_name"
     local new_module="github.com/$gitHubOwner/$new_name"
 
