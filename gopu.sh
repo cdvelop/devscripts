@@ -19,7 +19,7 @@ if [ $? -eq 0 ]; then # Verificar si es 0
     #obtenemos el nombre del modulo go
     go_mod_name=$(gawk -v pattern=$currentGitHostUserPath/ 'NR==1 && match($0, pattern "([^/]+)", arr) { print arr[1] }' go.mod)
   
-    bash gomodrename.sh "$go_mod_name" "$latest_tag"
+    bash gomodtagupdate.sh "$go_mod_name" "$latest_tag"
     if [ $? -eq 0 ]; then # si es 0 realizamos backup
       source backupwindows.sh
     fi

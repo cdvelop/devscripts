@@ -19,7 +19,7 @@ scripts commonly used by a developer in his daily workflow
 | `gomodcheck.sh`        | Checks and updates Go module dependencies, runs tests and performs data race detection                                | `./gomodcheck.sh`              |
 | `gomodinit.sh`         | Script to initialize a Go module and create basic project structure                                                   | `./gomodinit.sh`               |
 | `gomodrename.sh`       | Rename a Go module and update all its references                                                                      | `./gomodrename.sh old-module-name new-module-name` |
-| `gomodulesupdate.sh`   | Updates Go module versions across all projects that use them                                                          | `./gomodulesupdate.sh <package-name> <new-version>` |
+| `gomodtagupdate.sh`   | Updates Go module versions across all projects that use them                                                          | `./gomodtagupdate.sh <package-name> <new-version>` |
 | `gomodutils.sh`        | Utility functions for managing Go modules and version updates                                                         | `source gomodutils.sh && update_single_go_module "mymodule" "v1.2.3"` |
 | `gonewproject.sh`      | Creates a new Go project with standard directory structure and initial files, sets up remote repository               | `./gonewproject.sh <repo-name> <description> [visibility]` |
 | `gopkgs.sh`            | Check if Go packages directory exists in current user's home                                                          | `./gopkgs.sh`                  |
