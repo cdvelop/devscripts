@@ -1,5 +1,5 @@
 #!/bin/bash
-# Description: Renames a repository both locally and on remote GitHub, updates Git remotes and module names if applicable
+# Description: Renames a repository both locally and on remote GitHub, updates Git remotes
 # Usage: ./reporename.sh <old-name> <new-name>
 
 source functions.sh
@@ -33,10 +33,10 @@ rename_repository() {
     # Check permissions first
     check_rename_permissions || return $?
 
-    # Get GitHub username from local git config
-    gitHubUser=$(git config --get user.name)
-    if [ -z "$gitHubUser" ]; then
-        error "Unable to get GitHub username from git config"
+    # Get GitHub username correctly from the gh CLI (more reliable than git config)
+    gitHubOwner=$(gh api user -q '.login')
+    if [ -z "$gitHubOwner" ]; then
+        error "Unable to get GitHub username from gh CLI"
         return 1
     fi
     
@@ -45,50 +45,23 @@ rename_repository() {
     local parent_dir=$(basename "$(pwd)")
     local grandparent_dir=$(basename "$(dirname "$(pwd)")")
     
-    # Confirm rename
-    read -p "Are you sure you want to rename repository '$old_name' to '$new_name'? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        warning "Operation cancelled by user"
-        return 1
-    fi
-
     # Rename repository using GitHub CLI (from outside the directory)
-    execute "gh api -X PATCH repos/$gitHubUser/$old_name -f name=$new_name" \
+    execute "gh repo rename $new_name --repo $gitHubOwner/$old_name" \
         "Failed to rename repository" \
         "Repository renamed from $old_name to $new_name successfully" || return $?
     
-    # Check if we need to rename local folder based on directory structure
-    local should_rename=false
-    if [ "$parent_dir" = "Packages" ] || [ "$parent_dir" = "Internal" -a "$grandparent_dir" = "Packages" ]; then
-        should_rename=true
-    fi
+    # Always rename the local folder when called from gorenameproject.sh
+    # Rename the folder
+    execute "mv '$old_name' '$new_name'" \
+        "Failed to rename local directory" \
+        "Local directory renamed from $old_name to $new_name" || return $?
     
-    if [ "$should_rename" = true ]; then
-        # Rename the folder
-        execute "mv '$old_name' '$new_name'" \
-            "Failed to rename local directory" \
-            "Local directory renamed from $old_name to $new_name" || return $?
-        
-        # Update Git remotes - need to cd into the new directory
-        pushd "$new_name" > /dev/null
-        execute "git remote set-url origin https://github.com/$gitHubUser/$new_name.git" \
-            "Failed to update Git remote URL" \
-            "Git remote URL updated successfully" || { popd > /dev/null; return $?; }
-        
-        # If it's a Go module, update module name
-        if [ -f "go.mod" ]; then
-            success "Go module detected. Updating module name..."
-            if command -v repomoduleupdate.sh >/dev/null 2>&1; then
-                repomoduleupdate.sh "$old_name" "$new_name"
-            else
-                warning "repomoduleupdate.sh script not found. Module name not updated."
-            fi
-        fi
-        popd > /dev/null
-    else
-        success "Directory structure doesn't match standard pattern. Local folder not renamed."
-    fi
+    # Update Git remotes - need to cd into the new directory
+    pushd "$new_name" > /dev/null
+    execute "git remote set-url origin https://github.com/$gitHubOwner/$new_name.git" \
+        "Failed to update Git remote URL" \
+        "Git remote URL updated successfully" || { popd > /dev/null; return $?; }
+    popd > /dev/null
 
     return 0
 }

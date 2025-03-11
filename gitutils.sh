@@ -4,6 +4,9 @@
 
 source functions.sh
 
+
+
+
 # Create README.md file
 create_readme() {
     local current_folder=$1

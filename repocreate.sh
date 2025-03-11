@@ -44,9 +44,7 @@ create_repository() {
         "Failed to create repository" \
         "Repository $repo_name created successfully as $visibility" || return $?
 
-    gitHubUser=$(get_github_user) || return $?
-
-    execute "git clone https://github.com/$gitHubUser/$repo_name.git" \
+    execute "git clone https://github.com/$gitHubOwner/$repo_name.git" \
         "Failed to clone repository" \
         "Repository cloned successfully" || return $?
 

@@ -36,7 +36,7 @@ check_delete_permissions() {
 delete_repository() {
     local repo_name=$1
     local force_delete=${2:-false}  # Default to non-force delete
-    local repo_owner=${3:-"$(get_github_user)"}  # Use provided owner or default to current user
+    local repo_owner=${3:-"$gitHubOwner"}  # Use provided owner or default to current user
 
     # Validate required arguments
     if [ -z "$repo_name" ]; then

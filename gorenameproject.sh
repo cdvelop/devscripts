@@ -13,8 +13,8 @@ check_required_scripts() {
         missing_scripts=1
     fi
     
-    if ! command -v gomodupdate.sh >/dev/null 2>&1; then
-        error "Required script 'gomodupdate.sh' not found in PATH"
+    if ! command -v gomodrename.sh >/dev/null 2>&1; then
+        error "Required script 'gomodrename.sh' not found in PATH"
         missing_scripts=1
     fi
     
@@ -30,13 +30,13 @@ rename_go_project() {
     if [ -z "$old_name" ] || [ -z "$new_name" ]; then
         error "Usage: rename_go_project <old-name> <new-name>"
         return 1
-    }
+    fi
     
     # Check if the repository directory exists in current directory
     if [ ! -d "$old_name" ]; then
         error "Directory '$old_name' not found in current directory. Please run this script from the parent directory of the repository."
         return 1
-    }
+    fi
     
     # Check for required scripts
     check_required_scripts || return $?
@@ -65,7 +65,7 @@ rename_go_project() {
         
         # Use pushd/popd to safely enter and exit the new directory
         pushd "$new_name" > /dev/null
-        if ! gomodupdate.sh "$old_name" "$new_name"; then
+        if ! gomodrename.sh "$old_name" "$new_name"; then
             error "Module update failed"
             warning "Repository was renamed but module references may not be fully updated"
             popd > /dev/null
@@ -86,8 +86,8 @@ rename_go_project() {
     success "Go project '$old_name' has been successfully renamed to '$new_name'"
     
     # Additional information
-    gitHubUser=$(git config --get user.name)
-    success "New repository URL: https://github.com/$gitHubUser/$new_name"
+    gitHubOwner=$(git config --get user.name)
+    success "New repository URL: https://github.com/$gitHubOwner/$new_name"
     
     return 0
 }
