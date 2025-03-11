@@ -9,27 +9,23 @@
 
 source functions.sh
 source gomodutils.sh
+source githubutils.sh
 
 # Rename Go module and update all references
-rename_go_module() {
+go_mod_rename() {
     local old_name=$1
     local new_name=$2
 
     # Validate arguments
     if [ -z "$old_name" ] || [ -z "$new_name" ]; then
-        error "Usage: rename_go_module <old-name> <new-name>"
+        error "Usage: go_mod_rename <old-name> <new-name>"
         return 1
     fi
 
-    # Get GitHub username from local git config
-    gitHubUser=$(git config --get user.name)
-    if [ -z "$gitHubUser" ]; then
-        error "Unable to get GitHub username from git config"
-        return 1
-    fi
 
-    local old_module="github.com/$gitHubUser/$old_name"
-    local new_module="github.com/$gitHubUser/$new_name"
+
+    local old_module="github.com/$gitHubOwner/$old_name"
+    local new_module="github.com/$gitHubOwner/$new_name"
 
     # Update go.mod file
     if [ -f "go.mod" ]; then
@@ -83,7 +79,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
         exit 1
     fi
 
-    rename_go_module "$1" "$2"
+    go_mod_rename "$1" "$2"
     exit_code=$?
     successMessages
     exit $exit_code

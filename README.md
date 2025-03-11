@@ -11,7 +11,7 @@ scripts commonly used by a developer in his daily workflow
 | `changeremote.sh`      | Script to change the remote URL of a Git repository                                                                   | `./changeremote.sh https://github.com/username/repository.git` |
 | `delete.sh`            | Script to delete a file locally and track the deletion in Git                                                         | `./delete.sh filename.txt`     |
 | `functions.sh`         | Helper functions for git and script execution management                                                              | `source functions.sh`          |
-| `githubutils.sh`       | Utility functions for GitHub repository management and user information retrieval                                     | `source githubutils.sh && get_github_user` |
+| `githubutils.sh`       | Utility functions for GitHub repository management and user information retrieval                                     | `source githubutils.sh`        |
 | `gitremtracking.sh`    | Removes files from git tracking both locally and remotely                                                             | `./gitremtracking.sh file1.txt file2.txt` |
 | `gitutils.sh`          | Git utilities for repository initialization and management                                                            | `source gitutils.sh && init_new_repo "my-project" "github.com/username"` |
 | `goaddtest.sh`         | Script to generate Go test files with unit test and benchmark templates                                               | `./goaddtest.sh CreateFile create` |
@@ -20,7 +20,6 @@ scripts commonly used by a developer in his daily workflow
 | `gomodinit.sh`         | Script to initialize a Go module and create basic project structure                                                   | `./gomodinit.sh`               |
 | `gomodrename.sh`       | Rename a Go module and update all its references                                                                      | `./gomodrename.sh old-module-name new-module-name` |
 | `gomodulesupdate.sh`   | Updates Go module versions across all projects that use them                                                          | `./gomodulesupdate.sh <package-name> <new-version>` |
-| `gomodupdate.sh`       | Updates Go module name and its references in all project files                                                        | `./gomodupdate.sh old-module-name new-module-name` |
 | `gomodutils.sh`        | Utility functions for managing Go modules and version updates                                                         | `source gomodutils.sh && update_single_go_module "mymodule" "v1.2.3"` |
 | `gonewproject.sh`      | Creates a new Go project with standard directory structure and initial files, sets up remote repository               | `./gonewproject.sh <repo-name> <description> [visibility]` |
 | `gopkgs.sh`            | Check if Go packages directory exists in current user's home                                                          | `./gopkgs.sh`                  |
@@ -35,7 +34,7 @@ scripts commonly used by a developer in his daily workflow
 | `repodelete.sh`        | Deletes a remote GitHub repository after confirmation and permission checks                                           | `./repodelete.sh <repo-name> [force_delete] [owner]` |
 | `repoexistingsetup.sh` | Setup additional files and tags for an existing Git repository                                                        | `./repoexistingsetup.sh`       |
 | `repolocalinit.sh`     | Initialize a new local Git repository with basic files and remote setup                                               | `./repolocalinit.sh`           |
-| `reporename.sh`        | Renames a repository both locally and on remote GitHub, updates Git remotes and module names if applicable            | `./reporename.sh <old-name> <new-name>` |
+| `reporename.sh`        | Renames a repository both locally and on remote GitHub, updates Git remotes                                           | `./reporename.sh <old-name> <new-name>` |
 | `syscall.sh`           | Check if a Go package uses syscall/js imports                                                                         | `./syscall.sh <package_name>`  |
 | `tag.sh`               | Script to automatically increment the last number in a Git tag                                                        | `./tag.sh (will get the latest tag and suggest the next one)` |
 | `tagalldelete.sh`      | Bulk delete git tags listed in a text file                                                                            | `./tagalldelete.sh <filename>` |
