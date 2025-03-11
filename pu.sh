@@ -2,6 +2,7 @@
 # Description: Script to commit changes, create a new tag, and push to remote
 # Usage: ./pu.sh "Commit message"
 source functions.sh
+source doingmdfile.sh
 
 
 current_folder=$(basename "$(pwd)")
@@ -9,17 +10,8 @@ current_folder=$(basename "$(pwd)")
 # Concatena los parámetros en una sola cadena
 commit_message="$*"
 
-# Comprueba si el archivo "changes.md" existe
-if [ -f "changes.md" ] && [ -s "changes.md" ]; then
-    # Lee el contenido del archivo
-    changes_content=$(cat changes.md)
-    if [ -n "$commit_message" ]; then
-        # Concatena los contenidos del archivo y los parámetros
-        commit_message="$commit_message $changes_content"
-    else
-        commit_message=$changes_content
-    fi   
-fi
+# Obtiene el mensaje de commit desde doing.md si existe
+commit_message=$(get_commit_message_from_doing_md "$commit_message")
 
 # Si commit_message está vacío, asigna un valor predeterminado
 if [ -z "$commit_message" ]; then
@@ -81,5 +73,5 @@ fi
 
 # Imprimir los mensajes acumulados
 successMessages
-deleteChangesFileContent
+deleteChangesDoingFile
 exit 0

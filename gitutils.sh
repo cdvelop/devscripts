@@ -3,6 +3,7 @@
 # Usage: source gitutils.sh && init_new_repo "my-project" "github.com/username"
 
 source functions.sh
+source doingmdfile.sh
 
 
 
@@ -18,21 +19,14 @@ create_readme() {
     return 0
 }
 
-# Create changes.md file
-create_changes_file() {
-    execute "echo 'init code' > changes.md" \
-        "Failed to create changes.md" \
-        "changes.md created" || return $?
 
-    return 0
-}
 
 # Initialize files for new repository
 init_base_files() {
     local current_folder=$1
 
     create_readme "$current_folder" || return $?
-    create_changes_file || return $?
+    create_doing_md_file || return $?
 
     return 0
 }

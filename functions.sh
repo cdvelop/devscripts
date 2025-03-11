@@ -71,10 +71,4 @@ successMessages(){
   message=""
 }
 
-# Function to check if "changes.md" exists and clear its content
-function deleteChangesFileContent() {
-    if [ -f "changes.md" ] && [ -s "changes.md" ]; then
-        # Clear file content
-        echo "" > changes.md
-    fi
-}
+
