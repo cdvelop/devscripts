@@ -9,10 +9,10 @@ current_folder=$(basename "$(pwd)")
 # Concatena los parámetros en una sola cadena
 commit_message="$*"
 
-# Comprueba si el archivo "changes.txt" existe
-if [ -f "changes.txt" ] && [ -s "changes.txt" ]; then
+# Comprueba si el archivo "changes.md" existe
+if [ -f "changes.md" ] && [ -s "changes.md" ]; then
     # Lee el contenido del archivo
-    changes_content=$(cat changes.txt)
+    changes_content=$(cat changes.md)
     if [ -n "$commit_message" ]; then
         # Concatena los contenidos del archivo y los parámetros
         commit_message="$commit_message $changes_content"

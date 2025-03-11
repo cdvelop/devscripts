@@ -71,10 +71,10 @@ successMessages(){
   message=""
 }
 
-# Function to check if "changes.txt" exists and clear its content
+# Function to check if "changes.md" exists and clear its content
 function deleteChangesFileContent() {
-    if [ -f "changes.txt" ] && [ -s "changes.txt" ]; then
+    if [ -f "changes.md" ] && [ -s "changes.md" ]; then
         # Clear file content
-        echo "" > changes.txt
+        echo "" > changes.md
     fi
 }

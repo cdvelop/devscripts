@@ -18,11 +18,11 @@ create_readme() {
     return 0
 }
 
-# Create changes.txt file
+# Create changes.md file
 create_changes_file() {
-    execute "echo 'init code' > changes.txt" \
-        "Failed to create changes.txt" \
-        "changes.txt created" || return $?
+    execute "echo 'init code' > changes.md" \
+        "Failed to create changes.md" \
+        "changes.md created" || return $?
 
     return 0
 }
