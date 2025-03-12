@@ -1,7 +1,6 @@
 #!/bin/bash
-# Check if Go packages directory exists in current user's home
+# Gets the parent directory of the script's location
 # Usage: source parentdir.sh  parentDir=$(get_parent_dir)
-# This script verifies if the Go packages directory exists in the user's home directory
 
 # reusing the function in other scripts
 get_parent_dir() {

@@ -3,10 +3,11 @@
 # Usage: ./goget.sh package-name
 
 source functions.sh
+source parentdir.sh
 
 pkg_name=$1
 
-pkg_path=$go_pkgs/$pkg_name
+pkg_path=$(get_parent_dir)/$pkg_name
 # warning "Package directory to update: $pkg_path"
 
 current_dir=$(pwd)

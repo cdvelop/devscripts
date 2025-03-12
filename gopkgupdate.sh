@@ -3,17 +3,18 @@
 # Usage: ./gopkgupdate.sh
 
 source functions.sh
+source parentdir.sh
 
 # Get username
 username=$(whoami)
 
 # Go packages directory
-go_pkgs="/c/Users/$username/Packages/go"
+parentDir=$(get_parent_dir)
 
 # Function to get the latest version of a package from Go packages directory
 getLatestVersion() {
     local package_name=$1
-    local package_dir="$go_pkgs/$package_name"
+    local package_dir="$parentDir/$package_name"
     local latest_tag=""
     if [ -d "$package_dir" ]; then
         cd "$package_dir"
