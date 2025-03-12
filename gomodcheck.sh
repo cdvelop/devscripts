@@ -19,28 +19,28 @@ if [ -f "go.mod" ]; then
   syscall_found=$?
   
   if [ $syscall_found -eq 0 ]; then
-    go_vet_dir=""
-    # success "directory $go_mod_name"
+    # Run go vet on the whole module
+    execute "go vet ./..." "go vet failed in $go_mod_name" "go vet $go_mod_name ok"
+    
+    # Check if any test files exist in the module
+    if [ -n "$(find . -type f -name "*_test.go")" ]; then
+      # Run all tests in the module and its subdirectories
+      execute "go test ./..." "Test errors found in $go_mod_name" "All tests in $go_mod_name passed"
+      
+      # Optional: Run tests with race detection
+      execute "go test -race ./..." "Race condition tests failed in $go_mod_name" "Race condition tests in $go_mod_name passed"
+    else
+      info "No test files found in $go_mod_name"
+    fi
+    
+    # If cmd directory exists, handle it specifically
     if [ -d "cmd" ]; then
-      # success "$go_mod_name contains cmd folder"
       if [ -d "cmd/$go_mod_name" ]; then
           go_vet_dir="./cmd/$go_mod_name"
       else
           go_vet_dir="./cmd"
       fi
       execute "go vet $go_vet_dir" "go vet failed in $go_mod_name $go_vet_dir" "go vet $go_mod_name $go_vet_dir ok"
-      
-      if [ -n "$(find . -type f -name "*_test.go")" ]; then
-          execute "go test" "Test errors found in $go_mod_name" "root test $go_mod_name ok"
-      fi
-      
-      # Find folders containing 'test' in name and run tests
-      test_folders=$(find -type d -name "*test*")
-      for folder in $test_folders; do
-          if [ -n "$(find $folder -type f -name "*_test.go")" ]; then
-              execute "go test $folder" "Test errors found in folder $folder in $go_mod_name" "$go_mod_name folder: $folder test ok"
-          fi
-      done
     fi
   fi
   

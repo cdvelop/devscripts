@@ -23,12 +23,12 @@ scripts commonly used by a developer in his daily workflow
 | `gomodtagupdate.sh`    | Updates Go module versions across all projects that use them                                                          | `./gomodtagupdate.sh <package-name> <new-version>` |
 | `gomodutils.sh`        | Utility functions for managing Go modules and version updates                                                         | `source gomodutils.sh && update_single_go_module "mymodule" "v1.2.3"` |
 | `gonewproject.sh`      | Creates a new Go project with standard directory structure and initial files, sets up remote repository               | `./gonewproject.sh <repo-name> <description> [visibility]` |
-| `gopkgs.sh`            | Check if Go packages directory exists in current user's home                                                          | `./gopkgs.sh`                  |
 | `gopkgupdate.sh`       | Updates Go packages in go.mod to their latest versions from local repositories                                        | `./gopkgupdate.sh`             |
 | `gopu.sh`              | Automated workflow for Go projects: checks modules, updates dependencies, creates tags, backs up and pushes to remote | `./gopu.sh "Commit message"`   |
 | `gorenameproject.sh`   | Script to rename a Go project and update its module references                                                        | `./gorenameproject.sh old-project-name new-project-name` |
 | `goupgrade.sh`         | Updates Go packages and tidies up module dependencies                                                                 | `./goupgrade.sh`               |
 | `licensecreate.sh`     | Create and commit a license file for a Git repository                                                                 | `./licensecreate.sh [license-type] [owner-name]` |
+| `parentdir.sh`         | Gets the parent directory of the script's location                                                                    | `source parentdir.sh  parentDir=$(get_parent_dir)` |
 | `pu.sh`                | Script to commit changes, create a new tag, and push to remote                                                        | `./pu.sh "Commit message"`     |
 | `rename.sh`            | Rename a file and update Git tracking                                                                                 | `./rename.sh <current_name> <new_name>` |
 | `repocreate.sh`        | Creates a new GitHub repository with initial README and license files                                                 | `./repocreate.sh my-repo "My description" [public|private]` |
