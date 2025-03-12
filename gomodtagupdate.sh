@@ -6,13 +6,16 @@
 
 source functions.sh
 source gomodutils.sh
+source parentdir.sh
+
+parentDir=$(get_parent_dir)
 
 # Update module version in all projects that use it
 update_module_version() {
     local pkg_name=$1
     local new_version=$2
-    if [ -d "$go_pkgs" ]; then
-        for observed_pkg in "$go_pkgs"/*; do
+    if [ -d "$parentDir" ]; then
+        for observed_pkg in "$parentDir"/*; do
             if [ "$(basename "$observed_pkg")" != "$pkg_name" ]; then
                 go_mod_file="$observed_pkg/go.mod"
                 

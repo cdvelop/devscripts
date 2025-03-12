@@ -12,9 +12,6 @@ message=""
 # user name expected eg: Juanin
 username=$(whoami)
 
-# Look for and update packages in "\Packages\go" directory
-go_pkgs="/c/Users/$username/Packages/go"
-
 # Function to display a success message
 success() {
   echo -e "\033[0;32m$1\033[0m" # green color
