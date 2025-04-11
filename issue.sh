@@ -1,7 +1,7 @@
 #!/bin/bash
 # Description: Script to manage GitHub issues
-# Usage: source ghissue.sh ej: ./pu.sh "Commit message #123 close" o ./pu.sh "Commit message #123 create"
-#        or run directly: ./ghissue.sh create "Issue title" or ./ghissue.sh close 123
+# Usage: source issue.sh ej: ./pu.sh "Commit message #123 close" o ./pu.sh "Commit message #123 create"
+#        or run directly: ./issue.sh create "Issue title" or ./issue.sh close 123
 
 # Aseguramos que la CLI de GitHub esté disponible
 check_gh_cli() {
@@ -101,8 +101,8 @@ parse_issue_command() {
 # Función para mostrar ayuda
 show_help() {
     echo "Uso:"
-    echo "  Como script: ./ghissue.sh <comando> [argumentos]"
-    echo "  Como fuente: source ghissue.sh"
+    echo "  Como script: ./issue.sh <comando> [argumentos]"
+    echo "  Como fuente: source issue.sh"
     echo ""
     echo "Comandos:"
     echo "  create \"Título del issue\"   - Crea un nuevo issue con el título especificado"
