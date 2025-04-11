@@ -177,7 +177,7 @@ show_help() {
     echo "  create \"Título\" [etiquetas] - Crea issue. Añade etiquetas separadas por coma después de #create."
     echo "                             Ej: ... #create bug,docs"
     echo "  close NUMERO               - Cierra el issue con el número especificado"
-    echo "  list | -l                - Lista los issues del repositorio actual"
+    echo "  list | l                - Lista los issues del repositorio actual"
     echo "  #NUMERO                    - Muestra los detalles del issue con el número especificado"
     echo "  parse \"Mensaje\"          - Prueba la función parse_issue_command con un mensaje"
     echo "  help                       - Muestra esta ayuda"
@@ -242,7 +242,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
             fi
             parse_issue_command "$1"
             ;;
-        list|-l)
+        list|l)
             list_issues
             ;;
         help|--help|-h)
