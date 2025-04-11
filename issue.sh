@@ -1,12 +1,16 @@
 #!/bin/bash
-# Description: Script to manage GitHub issues
-# Usage: source issue.sh ej: ./pu.sh "Commit message #123 close" o ./pu.sh "Commit message #123 create"
-#        or run directly: ./issue.sh create "Issue title" or ./issue.sh close 123
+# Description: Script to manage GitHub issues using functions.sh helpers
+# Usage: source issue.sh or ./issue.sh <command> [args]
+
+# Source helper functions
+source functions.sh
 
 # Aseguramos que la CLI de GitHub esté disponible
 check_gh_cli() {
-    if ! command -v gh &> /dev/null; then
-        echo "Error: GitHub CLI (gh) no está instalado."
+    # Use execute to check command existence silently, add error if fails
+    execute "command -v gh &> /dev/null" "GitHub CLI (gh) no está instalado." "" "no_exit"
+    # Check the return code of the last execute command
+    if [ $? -ne 0 ]; then
         return 1
     fi
     return 0
@@ -16,144 +20,209 @@ check_gh_cli() {
 close_issue() {
     local issue_number=$1
     if [[ -z "$issue_number" ]]; then
-        echo "Error: Número de issue no proporcionado."
+        addERRORmessage "Número de issue no proporcionado para cerrar."
         return 1
     fi
-    
-    check_gh_cli || return 1
-    
-    echo "Cerrando issue #$issue_number..."
-    gh issue close "$issue_number" || {
-        echo "Error al cerrar el issue #$issue_number."
-        return 1
-    }
-    echo "Issue #$issue_number cerrado correctamente."
-    return 0
+
+    check_gh_cli || return 1 # Stop if gh cli check fails
+
+    execute "gh issue close \"$issue_number\"" \
+            "Error al cerrar el issue #$issue_number." \
+            "Issue #$issue_number cerrado correctamente."
+    return $? # Return the exit code of the execute command
 }
 
-# Crea un issue con el título proporcionado
+# Crea un issue con el título proporcionado y opcionalmente añade etiquetas
 create_issue() {
     local title="$1"
+    local labels_str="$2" # Optional second argument for comma-separated labels
+    local issue_url=""
+
     if [[ -z "$title" ]]; then
-        echo "Error: Título del issue no proporcionado."
+        addERRORmessage "Título del issue no proporcionado para crear."
         return 1
     fi
-    
-    check_gh_cli || return 1
-    
-    echo "Creando issue: '$title'..."
-    local issue_url
-    issue_url=$(gh issue create --title "$title" --body "Issue creado automáticamente desde el script pu.sh")
-    
-    if [[ $? -ne 0 ]]; then
-        echo "Error al crear el issue con título: $title"
-        return 1
+
+    check_gh_cli || return 1 # Stop if gh cli check fails
+
+    # Create the issue first and capture the URL from stdout on success
+    # We need to run this slightly differently than the standard 'execute' to capture the URL
+    issue_url=$(gh issue create --title "$title" --body "Issue creado automáticamente desde script." 2>&1)
+    local exit_code=$?
+
+    if [ $exit_code -ne 0 ]; then
+        # If creation failed, add error message using the captured output (which is the error message from gh)
+        addERRORmessage "Error al crear el issue con título '$title': $issue_url"
+        return $exit_code
+    else
+        # If creation succeeded, add success message
+        addOKmessage "Issue '$title' creado correctamente: $issue_url"
+
+        # Now, if labels were provided, add them
+        if [[ -n "$labels_str" ]]; then
+            # Save and restore IFS to handle labels with spaces if needed, though gh cli might handle quotes
+            local OLD_IFS="$IFS"
+            IFS=','
+            local labels_array=($labels_str) # Split string into array by comma
+            IFS="$OLD_IFS"
+
+            addOKmessage "Añadiendo etiquetas: ${labels_array[*]}" # Show labels being added
+
+            for label in "${labels_array[@]}"; do
+                # Trim potential leading/trailing whitespace from label
+                label=$(echo "$label" | xargs)
+                if [[ -n "$label" ]]; then # Ensure label is not empty after trimming
+                    # Use execute to add each label, referencing the issue by URL
+                    execute "gh issue edit \"$issue_url\" --add-label \"$label\"" \
+                            "Error al añadir etiqueta '$label' al issue $issue_url." \
+                            "Etiqueta '$label' añadida."
+                    # Optional: could check exit code here and break if one label fails
+                fi
+            done
+        fi
+        return 0 # Overall success
     fi
-    
-    echo "Issue creado correctamente: $issue_url"
-    return 0
+}
+
+# Lista los issues del repositorio actual
+list_issues() {
+    check_gh_cli || return 1 # Stop if gh cli check fails
+
+    # Execute gh issue list directly to allow output to pass through
+    gh issue list
+    local exit_code=$? # Capture exit code of gh issue list
+
+    if [ $exit_code -ne 0 ]; then
+        addERRORmessage "Error al listar los issues."
+    else
+        # Add a success message only if the command succeeded,
+        # but the main output is the list itself printed above.
+        addOKmessage "Listado de issues mostrado."
+    fi
+    return $exit_code
 }
 
 # Función para extraer información de issues del mensaje de commit
 parse_issue_command() {
     local commit_message="$1"
-    echo "Analizando mensaje: '$commit_message'"
+    # addOKmessage "Analizando mensaje para comandos de issue: '$commit_message'" # Optional: uncomment for debugging
 
-    # More flexible patterns to find issue number and action keyword anywhere
+    # Pattern to capture close command and issue number
     local issue_close_pattern='(close|closes|closed).*#([0-9]+)|#([0-9]+).*(close|closes|closed)'
-    local create_pattern='(.*)#(create|new)' # Capture title before #create or #new
+    # Pattern to capture title, create command, and optional labels (comma-separated, no spaces around commas assumed for simplicity)
+    local create_pattern='(.*)#(create|new)[ ]*([^#]*)' # Group 1: Title, Group 2: Command, Group 3: Labels
 
     local issue_number=""
     local action=""
     local title=""
+    local labels=""
+    local title=""
 
-    # Check for close command first
     if [[ $commit_message =~ $issue_close_pattern ]]; then
-        # Determine which capture group matched the number
-        if [[ -n "${BASH_REMATCH[2]}" ]]; then
-            issue_number="${BASH_REMATCH[2]}"
-            action="close"
-        elif [[ -n "${BASH_REMATCH[3]}" ]]; then
-            issue_number="${BASH_REMATCH[3]}"
-            action="close"
-        fi
-        echo "Patrón de cierre coincide. Issue: #$issue_number, Acción: $action"
+        if [[ -n "${BASH_REMATCH[2]}" ]]; then issue_number="${BASH_REMATCH[2]}"; fi
+        if [[ -n "${BASH_REMATCH[3]}" ]]; then issue_number="${BASH_REMATCH[3]}"; fi
+        action="close"
+        # addOKmessage "Patrón de cierre coincide. Issue: #$issue_number" # Optional debug
         close_issue "$issue_number"
-    # Check for create command
     elif [[ $commit_message =~ $create_pattern ]]; then
-        # Extract title (group 1) and action (group 2)
-        title=$(echo "${BASH_REMATCH[1]}" | xargs) # Trim whitespace
+        title=$(echo "${BASH_REMATCH[1]}" | xargs) # Trim whitespace title
         action="${BASH_REMATCH[2]}"
+        labels=$(echo "${BASH_REMATCH[3]}" | xargs) # Trim whitespace labels string
+
         if [[ -n "$title" ]]; then
-            echo "Patrón de creación coincide. Título: '$title', Acción: $action"
-            create_issue "$title"
+            # addOKmessage "Patrón de creación coincide. Título: '$title', Etiquetas: '$labels'" # Optional debug
+            create_issue "$title" "$labels" # Pass title and labels string
         else
-            echo "Error: No se pudo extraer un título para el nuevo issue desde '$commit_message'."
+            addERRORmessage "No se pudo extraer un título para el nuevo issue desde '$commit_message'."
         fi
     else
-        echo "Ningún patrón (cerrar o crear) coincidió para el mensaje: '$commit_message'"
-        echo "Patrones buscados:"
-        echo "  - Close: '$issue_close_pattern'"
-        echo "  - Create: '$create_pattern'"
+        # Only show message if called directly with 'parse' command, not when sourced
+         if [[ "${BASH_SOURCE[0]}" == "${0}" ]] && [[ "$current_command" == "parse" ]]; then
+             addERRORmessage "Ningún patrón (cerrar o crear) coincidió para el mensaje: '$commit_message'"
+         fi
     fi
 }
 
-# Función para mostrar ayuda
+# Función para mostrar ayuda (uses standard echo)
 show_help() {
     echo "Uso:"
     echo "  Como script: ./issue.sh <comando> [argumentos]"
-    echo "  Como fuente: source issue.sh"
+    echo "  Como fuente: source issue.sh (usado por pu.sh)"
     echo ""
     echo "Comandos:"
-    echo "  create \"Título del issue\"   - Crea un nuevo issue con el título especificado"
+    echo "  create \"Título\" [etiquetas] - Crea issue. Añade etiquetas separadas por coma después de #create."
+    echo "                             Ej: ... #create bug,docs"
     echo "  close NUMERO               - Cierra el issue con el número especificado"
-    echo "  parse \"Mensaje de commit\"   - Prueba la función parse_issue_command con un mensaje"
+    echo "  list | -l                - Lista los issues del repositorio actual"
+    echo "  parse \"Mensaje\"          - Prueba la función parse_issue_command con un mensaje"
     echo "  help                       - Muestra esta ayuda"
+    echo ""
+    echo "Nota: Cuando se usa como fuente (source), solo se exponen las funciones."
+    echo "      Los mensajes de éxito/error se manejan a través de functions.sh."
 }
 
 # Ejecutar como script independiente si se llama directamente
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    # El script se está ejecutando directamente, no como fuente
+    current_command="" # Variable to track the command for context
     if [ $# -lt 1 ]; then
         show_help
         exit 1
     fi
 
     comando="$1"
+    current_command="$comando" # Store command
     shift
 
     case "$comando" in
         create)
             if [ -z "$1" ]; then
-                echo "Error: Debe proporcionar un título para el issue."
+                addERRORmessage "Debe proporcionar un título para el issue."
                 show_help
+                successMessages # Print accumulated messages before exiting
                 exit 1
             fi
             create_issue "$1"
             ;;
         close)
             if [ -z "$1" ]; then
-                echo "Error: Debe proporcionar un número de issue."
+                addERRORmessage "Debe proporcionar un número de issue."
                 show_help
+                successMessages # Print accumulated messages before exiting
                 exit 1
             fi
             close_issue "$1"
             ;;
         parse)
             if [ -z "$1" ]; then
-                echo "Error: Debe proporcionar un mensaje para analizar."
+                addERRORmessage "Debe proporcionar un mensaje para analizar."
                 show_help
+                successMessages # Print accumulated messages before exiting
                 exit 1
             fi
             parse_issue_command "$1"
             ;;
+        list|-l)
+            list_issues
+            ;;
         help|--help|-h)
             show_help
+            # No messages to print for help
+            exit 0
             ;;
         *)
-            echo "Error: Comando desconocido '$comando'"
+            addERRORmessage "Comando desconocido '$comando'"
             show_help
+            successMessages # Print accumulated messages before exiting
             exit 1
             ;;
     esac
+
+    # Print accumulated success/error messages at the end of direct execution
+    successMessages
+    # Exit with 1 if there were errors (message variable contains ERROR symbol)
+    if [[ "$message" == *"ERROR"* ]]; then
+        exit 1
+    else
+        exit 0
+    fi
 fi
