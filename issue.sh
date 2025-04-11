@@ -102,6 +102,30 @@ list_issues() {
     return $exit_code
 }
 
+# Muestra un issue por su número
+view_issue() {
+    local issue_number=$1
+    if [[ -z "$issue_number" ]]; then
+        addERRORmessage "Número de issue no proporcionado para ver."
+        return 1
+    fi
+
+    check_gh_cli || return 1 # Stop if gh cli check fails
+
+    # Execute gh issue view directly to allow output to pass through
+    gh issue view "$issue_number"
+    local exit_code=$? # Capture exit code of gh issue view
+
+    if [ $exit_code -ne 0 ]; then
+        addERRORmessage "Error al ver el issue #$issue_number."
+    else
+        # Add a success message only if the command succeeded,
+        # but the main output is the view itself printed above.
+        addOKmessage "Mostrando issue #$issue_number."
+    fi
+    return $exit_code
+}
+
 # Función para extraer información de issues del mensaje de commit
 parse_issue_command() {
     local commit_message="$1"
@@ -154,6 +178,7 @@ show_help() {
     echo "                             Ej: ... #create bug,docs"
     echo "  close NUMERO               - Cierra el issue con el número especificado"
     echo "  list | -l                - Lista los issues del repositorio actual"
+    echo "  #NUMERO                    - Muestra los detalles del issue con el número especificado"
     echo "  parse \"Mensaje\"          - Prueba la función parse_issue_command con un mensaje"
     echo "  help                       - Muestra esta ayuda"
     echo ""
@@ -164,6 +189,22 @@ show_help() {
 # Ejecutar como script independiente si se llama directamente
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     current_command="" # Variable to track the command for context
+
+    # Check for #<number> pattern first
+    if [[ "$1" =~ ^#([0-9]+)$ ]]; then
+        issue_num="${BASH_REMATCH[1]}"
+        view_issue "$issue_num"
+        # Print accumulated success/error messages
+        successMessages
+        # Exit with 1 if there were errors
+        if [[ "$message" == *"ERROR"* ]]; then
+            exit 1
+        else
+            exit 0
+        fi
+    fi
+
+    # Proceed with other commands if #<number> pattern doesn't match
     if [ $# -lt 1 ]; then
         show_help
         exit 1
