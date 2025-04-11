@@ -3,7 +3,7 @@
 # Usage: ./pu.sh "Commit message"
 source functions.sh
 source doingmdfile.sh
-
+source ghissue.sh # Incluir script para manejar issues de GitHub
 
 current_folder=$(basename "$(pwd)")
 
@@ -26,6 +26,8 @@ if git diff-index --quiet HEAD --; then
     echo "No hay cambios que commitear."
 else
     execute "git commit -m '$commit_message'" "Error al crear el nuevo commit $current_folder."
+    # Analiza el mensaje de commit para detectar comandos de issues
+    parse_issue_command "$commit_message"
 fi
 
 # Obtén la última etiqueta
