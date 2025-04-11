@@ -57,22 +57,44 @@ create_issue() {
 # Función para extraer información de issues del mensaje de commit
 parse_issue_command() {
     local commit_message="$1"
-    local issue_pattern='#([0-9]+).*\b(close|closes|closed)\b'
-    local create_pattern='#[ ]*(create|new)'
-    
-    if [[ $commit_message =~ $issue_pattern ]]; then
-        local issue_number="${BASH_REMATCH[1]}"
-        echo "Detectado comando para cerrar issue #$issue_number"
+    echo "Analizando mensaje: '$commit_message'"
+
+    # More flexible patterns to find issue number and action keyword anywhere
+    local issue_close_pattern='(close|closes|closed).*#([0-9]+)|#([0-9]+).*(close|closes|closed)'
+    local create_pattern='(.*)#(create|new)' # Capture title before #create or #new
+
+    local issue_number=""
+    local action=""
+    local title=""
+
+    # Check for close command first
+    if [[ $commit_message =~ $issue_close_pattern ]]; then
+        # Determine which capture group matched the number
+        if [[ -n "${BASH_REMATCH[2]}" ]]; then
+            issue_number="${BASH_REMATCH[2]}"
+            action="close"
+        elif [[ -n "${BASH_REMATCH[3]}" ]]; then
+            issue_number="${BASH_REMATCH[3]}"
+            action="close"
+        fi
+        echo "Patrón de cierre coincide. Issue: #$issue_number, Acción: $action"
         close_issue "$issue_number"
+    # Check for create command
     elif [[ $commit_message =~ $create_pattern ]]; then
-        # Extraer el título del issue (todo lo que está antes de #)
-        local title=$(echo "$commit_message" | sed -n 's/\(.*\)#[ ]*\(create\|new\).*/\1/p' | xargs)
-        if [ -n "$title" ]; then
-            echo "Detectado comando para crear issue con título: '$title'"
+        # Extract title (group 1) and action (group 2)
+        title=$(echo "${BASH_REMATCH[1]}" | xargs) # Trim whitespace
+        action="${BASH_REMATCH[2]}"
+        if [[ -n "$title" ]]; then
+            echo "Patrón de creación coincide. Título: '$title', Acción: $action"
             create_issue "$title"
         else
-            echo "Error: No se pudo extraer un título para el nuevo issue."
+            echo "Error: No se pudo extraer un título para el nuevo issue desde '$commit_message'."
         fi
+    else
+        echo "Ningún patrón (cerrar o crear) coincidió para el mensaje: '$commit_message'"
+        echo "Patrones buscados:"
+        echo "  - Close: '$issue_close_pattern'"
+        echo "  - Create: '$create_pattern'"
     fi
 }
 
