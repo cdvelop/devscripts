@@ -1,6 +1,6 @@
 #!/bin/bash
 # Description: Script to manage GitHub issues
-# Usage: source ghissue.sh
+# Usage: source ghissue.sh ej: ./pu.sh "Commit message #123 close" o ./pu.sh "Commit message #123 create"
 
 # Aseguramos que la CLI de GitHub esté disponible
 check_gh_cli() {
