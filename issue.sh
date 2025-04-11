@@ -57,7 +57,7 @@ create_issue() {
 # Función para extraer información de issues del mensaje de commit
 parse_issue_command() {
     local commit_message="$1"
-    local issue_pattern='#([0-9]+)[ ]*(close|closes|closed)'
+    local issue_pattern='#([0-9]+).*\b(close|closes|closed)\b'
     local create_pattern='#[ ]*(create|new)'
     
     if [[ $commit_message =~ $issue_pattern ]]; then
