@@ -176,11 +176,11 @@ show_help() {
     echo "Comandos:"
     echo "  create \"Título\" [etiquetas] - Crea issue. Añade etiquetas separadas por coma después de #create."
     echo "                             Ej: ... #create bug,docs"
-    echo "  close NUMERO               - Cierra el issue con el número especificado"
-    echo "  list | l                - Lista los issues del repositorio actual"
-    echo "  #NUMERO                    - Muestra los detalles del issue con el número especificado"
-    echo "  parse \"Mensaje\"          - Prueba la función parse_issue_command con un mensaje"
-    echo "  help                       - Muestra esta ayuda"
+    echo "  close NUMERO                - Cierra el issue con el número especificado"
+    echo "  list | l                    - Lista los issues del repositorio actual ej: /.issue.sh l"
+    echo "  NUMERO                      - Muestra detalles del issue ej: /.issue.sh 123"
+    echo "  parse \"Mensaje\"             - Prueba la función parse_issue_command con un mensaje"
+    echo "  help                        - Muestra esta ayuda"
     echo ""
     echo "Nota: Cuando se usa como fuente (source), solo se exponen las funciones."
     echo "      Los mensajes de éxito/error se manejan a través de functions.sh."
@@ -191,9 +191,9 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     current_command="" # Variable to track the command for context
 
     # Check for #<number> pattern first
-    if [[ "$1" =~ ^#([0-9]+)$ ]]; then
-        issue_num="${BASH_REMATCH[1]}"
-        view_issue "$issue_num"
+    # Check for number first
+    if [[ "$1" =~ ^([0-9]+)$ ]]; then
+        view_issue "$1"
         # Print accumulated success/error messages
         successMessages
         # Exit with 1 if there were errors
