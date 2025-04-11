@@ -12,7 +12,6 @@ scripts commonly used by a developer in his daily workflow
 | `delete.sh`            | Script to delete a file locally and track the deletion in Git                                                         | `./delete.sh filename.txt`     |
 | `doingmdfile.sh`       | Functions to work with doing.md file                                                                                  | `usage: source doingmdfile.sh` |
 | `functions.sh`         | Helper functions for git and script execution management                                                              | `source functions.sh`          |
-| `ghissue.sh`           | Script to manage GitHub issues                                                                                        | `source ghissue.sh`            |
 | `githubutils.sh`       | Utility functions for GitHub repository management and user information retrieval                                     | `source githubutils.sh`        |
 | `gitremtracking.sh`    | Removes files from git tracking both locally and remotely                                                             | `./gitremtracking.sh file1.txt file2.txt` |
 | `gitutils.sh`          | Git utilities for repository initialization and management                                                            | `source gitutils.sh && init_new_repo "my-project" "github.com/username"` |
@@ -28,6 +27,7 @@ scripts commonly used by a developer in his daily workflow
 | `gopu.sh`              | Automated workflow for Go projects: checks modules, updates dependencies, creates tags, backs up and pushes to remote | `./gopu.sh "Commit message"`   |
 | `gorenameproject.sh`   | Script to rename a Go project and update its module references                                                        | `./gorenameproject.sh old-project-name new-project-name` |
 | `goupgrade.sh`         | Updates Go packages and tidies up module dependencies                                                                 | `./goupgrade.sh`               |
+| `issue.sh`             | Script to manage GitHub issues                                                                                        | `source ghissue.sh ej: ./pu.sh "Commit message #123 close" o ./pu.sh "Commit message #123 create"` |
 | `licensecreate.sh`     | Create and commit a license file for a Git repository                                                                 | `./licensecreate.sh [license-type] [owner-name]` |
 | `parentdir.sh`         | Gets the parent directory of the script's location                                                                    | `source parentdir.sh  parentDir=$(get_parent_dir)` |
 | `pu.sh`                | Script to commit changes, create a new tag, and push to remote                                                        | `./pu.sh "Commit message"`     |

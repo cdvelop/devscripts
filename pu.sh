@@ -3,7 +3,7 @@
 # Usage: ./pu.sh "Commit message"
 source functions.sh
 source doingmdfile.sh
-source ghissue.sh # Incluir script para manejar issues de GitHub
+source issue.sh # Incluir script para manejar issues de GitHub
 
 current_folder=$(basename "$(pwd)")
 
