@@ -10,17 +10,16 @@ current_folder=$(basename "$(pwd)")
 # Concatena los parámetros en una sola cadena
 commit_message="$*"
 
+# Analiza el mensaje para detectar comandos de issues ANTES de modificarlo
+parse_issue_command "$commit_message"
+
 # Obtiene el mensaje de commit desde doing.md si existe
 commit_message=$(get_commit_message_from_doing_md "$commit_message")
 
-# Si commit_message está vacío, asigna un valor predeterminado
+# Si commit_message está vacío después de la función, asigna un valor predeterminado
 if [ -z "$commit_message" ]; then
     commit_message="auto update package"
 fi
-
-# Analiza el mensaje para detectar comandos de issues
-# Ejecutar esto antes de verificar si hay cambios
-parse_issue_command "$commit_message"
 
 # Agrega cambios al índice
 execute "git add ." "Error al añadir cambios a Git $current_folder." "cambios $current_folder añadidos"
