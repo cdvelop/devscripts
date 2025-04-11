@@ -18,6 +18,10 @@ if [ -z "$commit_message" ]; then
     commit_message="auto update package"
 fi
 
+# Analiza el mensaje para detectar comandos de issues
+# Ejecutar esto antes de verificar si hay cambios
+parse_issue_command "$commit_message"
+
 # Agrega cambios al índice
 execute "git add ." "Error al añadir cambios a Git $current_folder." "cambios $current_folder añadidos"
 
@@ -26,8 +30,6 @@ if git diff-index --quiet HEAD --; then
     echo "No hay cambios que commitear."
 else
     execute "git commit -m '$commit_message'" "Error al crear el nuevo commit $current_folder."
-    # Analiza el mensaje de commit para detectar comandos de issues
-    parse_issue_command "$commit_message"
 fi
 
 # Obtén la última etiqueta
