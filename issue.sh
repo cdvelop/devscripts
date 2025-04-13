@@ -1,6 +1,6 @@
 #!/bin/bash
 # Description: Script to manage GitHub issues using functions.sh helpers
-# Usage: source issue.sh or ./issue.sh <command> [args]
+# Usage: ./issue.sh <command> [args] eg: ./issue.sh + "My issue" bug, ./issue.sh - 4 "Closed by xxx",
 
 # Source helper functions
 source functions.sh
@@ -19,6 +19,7 @@ check_gh_cli() {
 # Cierra un issue por su número
 close_issue() {
     local issue_number=$1
+    local close_message=$2  # Optional message parameter
     if [[ -z "$issue_number" ]]; then
         addERRORmessage "Número de issue no proporcionado para cerrar."
         return 1
@@ -26,7 +27,13 @@ close_issue() {
 
     check_gh_cli || return 1 # Stop if gh cli check fails
 
-    execute "gh issue close \"$issue_number\"" \
+    # Build command based on whether a message was provided
+    local command="gh issue close \"$issue_number\""
+    if [[ -n "$close_message" ]]; then
+        command="$command --comment \"$close_message\""
+    fi
+
+    execute "$command" \
             "Error al cerrar el issue #$issue_number." \
             "Issue #$issue_number cerrado correctamente."
     return $? # Return the exit code of the execute command
@@ -170,13 +177,17 @@ show_help() {
     echo "  Como fuente: source issue.sh (usado por pu.sh)"
     echo ""
     echo "Comandos:"
-    echo "  create \"Título\" [etiquetas] - Crea issue. Añade etiquetas separadas por coma después de #create."
-    echo "                             Ej: ... #create bug,docs"
-    echo "  close NUMERO                - Cierra el issue con el número especificado"
-    echo "  list | l                    - Lista los issues del repositorio actual ej: /.issue.sh l"
-    echo "  NUMERO                      - Muestra detalles del issue ej: /.issue.sh 123"
-    echo "  parse \"Mensaje\"             - Prueba la función parse_issue_command con un mensaje"
-    echo "  help                        - Muestra esta ayuda"
+    echo "  create | + \"Título\" [etiquetas] - Crea issue. Añade etiquetas opcionales."
+    echo "                                 Ej: ./issue.sh + \"Mi issue\" bug"
+    echo "  close | - NUMERO [mensaje]      - Cierra el issue con el número especificado"
+    echo "                                 y un mensaje opcional."
+    echo "                                 Ej: ./issue.sh - 4 \"Cerrado por xxx\""
+    echo "  list | l                        - Lista los issues del repositorio actual"
+    echo "                                 Ej: ./issue.sh l"
+    echo "  NUMERO                          - Muestra detalles del issue"
+    echo "                                 Ej: ./issue.sh 123"
+    echo "  parse \"Mensaje\"                 - Prueba la función parse_issue_command con un mensaje"
+    echo "  help                            - Muestra esta ayuda"
     echo ""
     echo "Nota: Cuando se usa como fuente (source), solo se exponen las funciones."
     echo "      Los mensajes de éxito/error se manejan a través de functions.sh."
@@ -211,23 +222,29 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     shift
 
     case "$comando" in
-        create)
+        create|+)
             if [ -z "$1" ]; then
                 addERRORmessage "Debe proporcionar un título para el issue."
                 show_help
                 successMessages # Print accumulated messages before exiting
                 exit 1
             fi
-            create_issue "$1"
+            title="$1"
+            shift
+            labels="$1"  # Optional label parameter
+            create_issue "$title" "$labels"
             ;;
-        close)
+        close|-)
             if [ -z "$1" ]; then
                 addERRORmessage "Debe proporcionar un número de issue."
                 show_help
                 successMessages # Print accumulated messages before exiting
                 exit 1
             fi
-            close_issue "$1"
+            issue_number="$1"
+            shift
+            close_message="$1"  # Optional closing message
+            close_issue "$issue_number" "$close_message"
             ;;
         parse)
             if [ -z "$1" ]; then

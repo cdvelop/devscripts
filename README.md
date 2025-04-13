@@ -27,7 +27,7 @@ scripts commonly used by a developer in his daily workflow
 | `gopu.sh`              | Automated workflow for Go projects: checks modules, updates dependencies, creates tags, backs up and pushes to remote | `./gopu.sh "Commit message"`   |
 | `gorenameproject.sh`   | Script to rename a Go project and update its module references                                                        | `./gorenameproject.sh old-project-name new-project-name` |
 | `goupgrade.sh`         | Updates Go packages and tidies up module dependencies                                                                 | `./goupgrade.sh`               |
-| `issue.sh`             | Script to manage GitHub issues using functions.sh helpers                                                             | `source issue.sh or ./issue.sh <command> [args]` |
+| `issue.sh`             | Script to manage GitHub issues using functions.sh helpers                                                             | `./issue.sh <command> [args] eg: ./issue.sh + "My issue" bug, ./issue.sh - 4 "Closed by xxx",` |
 | `licensecreate.sh`     | Create and commit a license file for a Git repository                                                                 | `./licensecreate.sh [license-type] [owner-name]` |
 | `parentdir.sh`         | Gets the parent directory of the script's location                                                                    | `source parentdir.sh  parentDir=$(get_parent_dir)` |
 | `pu.sh`                | Script to commit changes, create a new tag, and push to remote                                                        | `./pu.sh "Commit message"`     |
