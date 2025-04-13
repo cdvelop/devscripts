@@ -78,19 +78,15 @@ save_unsaved_files() {
     return 0
   fi
   
-  local modified_files=$(git ls-files --modified --others --exclude-standard)
-  
-  if [ -n "$modified_files" ]; then
-    warning "Se detectaron archivos modificados que no estaban guardados en git"
-    git add .
-    success "Archivos guardados automáticamente"
+  # PASO 1: Guardar archivos de VSCode que estén en memoria pero no guardados en disco
+  if command -v code >/dev/null 2>&1; then
+    warning "Guardando archivos no guardados en VSCode..."
+    code --save-all >/dev/null 2>&1 || true
     
-    # Informar de los archivos que se guardaron
-    echo "$modified_files" | while read -r file; do
-      echo -e "\033[0;36m - $file\033[0m"  # Cyan color para los archivos
-    done
+    # Pequeña pausa para permitir que VSCode complete el guardado
+    sleep 1
   fi
-  
+    
   # Marcar como ejecutado
   _SAVE_UNSAVED_EXECUTED=1
 }
