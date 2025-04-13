@@ -79,17 +79,34 @@ save_unsaved_files() {
   fi
   
   # PASO 1: Guardar archivos de VSCode que estén en memoria pero no guardados en disco
-  if command -v code >/dev/null 2>&1; then
-    warning "Guardando archivos no guardados en VSCode..."
-    code -r --command workbench.action.files.saveAll >/dev/null 2>&1 || true
-    sleep 1
-  fi
+powershell -Command "
+\$proc = Get-Process -Name Code -ErrorAction SilentlyContinue | Select-Object -First 1;
+if (\$proc) {
+    # Función para activar la ventana usando la API de user32.dll
+    Add-Type -AssemblyName System.Runtime.InteropServices;
+    function Set-ForegroundWindow(\$hWnd) {
+        \$user32 = Add-Type -MemberDefinition @'
+        [DllImport(\"user32.dll\")]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
+'@ -Name User32 -Namespace Win32 -PassThru;
+        [void]\$user32::SetForegroundWindow(\$hWnd);
+    }
+    Set-ForegroundWindow(\$proc.MainWindowHandle);
+    
+    # Enviar la secuencia de teclas Ctrl+S para guardar todos los archivos
+    Add-Type -AssemblyName System.Windows.Forms;
+    [System.Windows.Forms.SendKeys]::SendWait('^s');
+    Start-Sleep -Seconds 1; # Espera 1 segundo para asegurar el guardado
+} else {
+    Write-Output 'Visual Studio Code no se encuentra corriendo.';
+}
+"
     
   # Marcar como ejecutado
   _SAVE_UNSAVED_EXECUTED=1
 }
 
-# Ejecutar save_unsaved_files automáticamente al cargar functions.sh ok
+# Ejecutar save_unsaved_files automáticamente al cargar functions.sh ok 4
 save_unsaved_files
 
 
