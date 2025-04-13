@@ -68,4 +68,34 @@ successMessages(){
   message=""
 }
 
+# Variable para controlar si save_unsaved_files ya se ejecutó
+_SAVE_UNSAVED_EXECUTED=0
+
+# Function to automatically check and save all modified files without asking
+save_unsaved_files() {
+  # Si ya se ejecutó, no hacer nada
+  if [ $_SAVE_UNSAVED_EXECUTED -eq 1 ]; then
+    return 0
+  fi
+  
+  local modified_files=$(git ls-files --modified --others --exclude-standard)
+  
+  if [ -n "$modified_files" ]; then
+    warning "Se detectaron archivos modificados que no estaban guardados en git"
+    git add .
+    success "Archivos guardados automáticamente"
+    
+    # Informar de los archivos que se guardaron
+    echo "$modified_files" | while read -r file; do
+      echo -e "\033[0;36m - $file\033[0m"  # Cyan color para los archivos
+    done
+  fi
+  
+  # Marcar como ejecutado
+  _SAVE_UNSAVED_EXECUTED=1
+}
+
+# Ejecutar save_unsaved_files automáticamente al cargar functions.sh
+save_unsaved_files
+
 
