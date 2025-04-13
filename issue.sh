@@ -118,10 +118,6 @@ view_issue() {
 
     if [ $exit_code -ne 0 ]; then
         addERRORmessage "Error al ver el issue #$issue_number."
-    else
-        # Add a success message only if the command succeeded,
-        # but the main output is the view itself printed above.
-        addOKmessage "Mostrando issue #$issue_number."
     fi
     return $exit_code
 }
