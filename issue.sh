@@ -1,6 +1,6 @@
 #!/bin/bash
 # Description: Script to manage GitHub issues using functions.sh helpers
-# Usage: ./issue.sh <command> [args] eg: ./issue.sh + "My issue" bug, ./issue.sh - 4 "Closed by xxx",
+# Usage: ./issue.sh <command> [args] eg: []./issue.sh + "My issue" bug] | - 4 "Closed by xxx" | ?
 
 # Source helper functions
 source functions.sh
@@ -177,17 +177,19 @@ show_help() {
     echo "  Como fuente: source issue.sh (usado por pu.sh)"
     echo ""
     echo "Comandos:"
+    echo "  (sin argumentos)                - Lista los issues del repositorio actual"
+    echo "                                 Ej: ./issue.sh"
+    echo "  list | l                        - Lista los issues del repositorio actual"
+    echo "                                 Ej: ./issue.sh l"
     echo "  create | + \"Título\" [etiquetas] - Crea issue. Añade etiquetas opcionales."
     echo "                                 Ej: ./issue.sh + \"Mi issue\" bug"
     echo "  close | - NUMERO [mensaje]      - Cierra el issue con el número especificado"
     echo "                                 y un mensaje opcional."
     echo "                                 Ej: ./issue.sh - 4 \"Cerrado por xxx\""
-    echo "  list | l                        - Lista los issues del repositorio actual"
-    echo "                                 Ej: ./issue.sh l"
     echo "  NUMERO                          - Muestra detalles del issue"
     echo "                                 Ej: ./issue.sh 123"
     echo "  parse \"Mensaje\"                 - Prueba la función parse_issue_command con un mensaje"
-    echo "  help                            - Muestra esta ayuda"
+    echo "  ? | help | h                    - Muestra esta ayuda"
     echo ""
     echo "Nota: Cuando se usa como fuente (source), solo se exponen las funciones."
     echo "      Los mensajes de éxito/error se manejan a través de functions.sh."
@@ -211,10 +213,16 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
         fi
     fi
 
-    # Proceed with other commands if #<number> pattern doesn't match
+    # If no arguments provided, list issues instead of showing help
     if [ $# -lt 1 ]; then
-        show_help
-        exit 1
+        current_command="list"
+        list_issues
+        successMessages
+        if [[ "$message" == *"ERROR"* ]]; then
+            exit 1
+        else
+            exit 0
+        fi
     fi
 
     comando="$1"
@@ -258,7 +266,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
         list|l)
             list_issues
             ;;
-        help|--help|-h)
+        \?|help|h) # Changed from help|--help|-h
             show_help
             # No messages to print for help
             exit 0
