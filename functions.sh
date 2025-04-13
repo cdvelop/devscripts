@@ -81,9 +81,7 @@ save_unsaved_files() {
   # PASO 1: Guardar archivos de VSCode que estén en memoria pero no guardados en disco
   if command -v code >/dev/null 2>&1; then
     warning "Guardando archivos no guardados en VSCode..."
-    code --save-all >/dev/null 2>&1 || true
-    
-    # Pequeña pausa para permitir que VSCode complete el guardado
+    code -r --command workbench.action.files.saveAll >/dev/null 2>&1 || true
     sleep 1
   fi
     
@@ -91,7 +89,7 @@ save_unsaved_files() {
   _SAVE_UNSAVED_EXECUTED=1
 }
 
-# Ejecutar save_unsaved_files automáticamente al cargar functions.sh
+# Ejecutar save_unsaved_files automáticamente al cargar functions.sh ok
 save_unsaved_files
 
 
