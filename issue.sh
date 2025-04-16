@@ -163,14 +163,19 @@ edit_issue_interactive() {
     fi
 
     # Guardar el cuerpo original en el archivo temporal
-    # Usar printf para manejar mejor saltos de línea y caracteres especiales
     printf "%s" "$original_body" > "$temp_file"
 
-    addOKmessage "Abriendo issue #$issue_number en Notepad. Guarda los cambios y cierra Notepad para continuar."
-    # notepad.exe bloqueará la ejecución del script hasta que se cierre
-    notepad.exe "$temp_file"
-    # Podríamos verificar el código de salida de notepad, pero no es muy fiable
-    # para saber si se guardó o no. Asumimos que si se cierra, el usuario quiere proceder.
+    addOKmessage "Abriendo issue #$issue_number en VS Code. Guarda los cambios y cierra la pestaña para continuar." # Mensaje actualizado
+    # Usar 'code --wait' para abrir en VS Code y esperar a que se cierre la pestaña
+    code --wait "$temp_file"
+    local editor_exit_code=$? # Capturar código de salida del editor (opcional, puede no ser fiable)
+
+    # Verificar si el editor se cerró correctamente (código 0)
+    # Aunque --wait funciona, el código de salida puede no siempre indicar si se guardó.
+    # La comparación de contenido sigue siendo la forma más fiable.
+    if [ $editor_exit_code -ne 0 ]; then
+        warning "VS Code se cerró con un código de error ($editor_exit_code). Verificando cambios de todos modos."
+    fi
 
     # Leer el contenido modificado del archivo temporal
     # Usar mapfile (readarray) es más seguro para leer archivos con saltos de línea
