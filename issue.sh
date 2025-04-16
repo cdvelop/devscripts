@@ -129,6 +129,76 @@ view_issue() {
     return $exit_code
 }
 
+# Edita interactivamente el cuerpo de un issue usando Notepad
+edit_issue_interactive() {
+    local issue_number=$1
+    local temp_file=""
+    local original_body=""
+    local modified_body=""
+
+    if [[ -z "$issue_number" ]]; then
+        addERRORmessage "Número de issue no proporcionado para editar."
+        return 1
+    fi
+
+    check_gh_cli || return 1
+
+    # Crear archivo temporal seguro y preparar limpieza automática
+    temp_file=$(mktemp --suffix=.md)
+    if [ $? -ne 0 ] || [ -z "$temp_file" ]; then
+         addERRORmessage "No se pudo crear archivo temporal para la edición."
+         return 1
+    fi
+    # Asegurar que el archivo temporal se borre al salir de la función (éxito, error o interrupción)
+    trap 'rm -f "$temp_file"' RETURN
+
+    addOKmessage "Obteniendo cuerpo actual del issue #$issue_number..."
+    # Usar gh issue view para obtener solo el cuerpo
+    original_body=$(gh issue view "$issue_number" --json body --jq .body)
+    local exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+        addERRORmessage "Error al obtener el cuerpo del issue #$issue_number. ¿Existe el issue?"
+        # El trap limpiará el archivo temporal
+        return $exit_code
+    fi
+
+    # Guardar el cuerpo original en el archivo temporal
+    # Usar printf para manejar mejor saltos de línea y caracteres especiales
+    printf "%s" "$original_body" > "$temp_file"
+
+    addOKmessage "Abriendo issue #$issue_number en Notepad. Guarda los cambios y cierra Notepad para continuar."
+    # notepad.exe bloqueará la ejecución del script hasta que se cierre
+    notepad.exe "$temp_file"
+    # Podríamos verificar el código de salida de notepad, pero no es muy fiable
+    # para saber si se guardó o no. Asumimos que si se cierra, el usuario quiere proceder.
+
+    # Leer el contenido modificado del archivo temporal
+    # Usar mapfile (readarray) es más seguro para leer archivos con saltos de línea
+    mapfile -t body_lines < "$temp_file"
+    modified_body=$(printf "%s\n" "${body_lines[@]}")
+    # Quitar el último salto de línea que printf añade si el archivo no terminaba en uno
+    if [[ $(wc -c < "$temp_file") -gt 0 && $(tail -c1 "$temp_file" | wc -l) -eq 0 ]]; then
+         modified_body=${modified_body%?}
+    fi
+
+
+    # Comparar si hubo cambios
+    if [[ "$original_body" == "$modified_body" ]]; then
+        addOKmessage "El contenido del issue #$issue_number no ha cambiado. No se requiere actualización."
+        # El trap limpiará el archivo temporal
+        return 0
+    fi
+
+    addOKmessage "Actualizando el cuerpo del issue #$issue_number en GitHub..."
+    # Usar --body-file es más robusto que --body "$variable" para contenido largo o complejo
+    execute "gh issue edit \"$issue_number\" --body-file \"$temp_file\"" \
+            "Error al actualizar el issue #$issue_number." \
+            "Issue #$issue_number actualizado correctamente."
+
+    # El trap limpiará el archivo temporal al retornar
+    return $?
+}
+
 # Función para extraer información de issues del mensaje de commit
 parse_issue_command() {
     local commit_message="$1"
@@ -254,6 +324,23 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
             close_message="$1"  # Optional closing message
             close_issue "$issue_number" "$close_message"
             ;;
+        edit|e) # Añadir caso para editar interactivamente
+            if [ -z "$1" ]; then
+                addERRORmessage "Debe proporcionar un número de issue para editar."
+                show_help
+                successMessages
+                exit 1
+            fi
+            # Verificar que no se pasen argumentos extra (este modo solo edita el cuerpo)
+            if [ $# -gt 1 ]; then
+                 addERRORmessage "El comando 'edit' interactivo solo acepta el número de issue."
+                 addOKmessage "Para editar otros campos (título, etiquetas, etc.), usa 'gh issue edit <num> [flags...]' directamente."
+                 successMessages
+                 exit 1
+            fi
+            issue_number="$1"
+            edit_issue_interactive "$issue_number"
+            ;;
         parse)
             if [ -z "$1" ]; then
                 addERRORmessage "Debe proporcionar un mensaje para analizar."
@@ -266,7 +353,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
         list|l)
             list_issues
             ;;
-        \?|help|h) # Changed from help|--help|-h
+        \?|help|h)
             show_help
             # No messages to print for help
             exit 0
