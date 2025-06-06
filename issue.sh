@@ -166,8 +166,10 @@ edit_issue_interactive() {
     printf "%s" "$original_body" > "$temp_file"
 
     addOKmessage "Abriendo issue #$issue_number en VS Code. Guarda los cambios y cierra la pestaña para continuar." # Mensaje actualizado
+    # Usar 'code -r -w' para abrir en la ventana existente y esperar
+    code -r -w "$temp_file"
     # Usar 'code --wait' para abrir en VS Code y esperar a que se cierre la pestaña
-    code --wait "$temp_file"
+    #code --wait "$temp_file"
     local editor_exit_code=$? # Capturar código de salida del editor (opcional, puede no ser fiable)
 
     # Verificar si el editor se cerró correctamente (código 0)

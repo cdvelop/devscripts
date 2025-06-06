@@ -21,6 +21,15 @@ update_and_verify_go_module() {
     return $?
 }
 
+# Function to get Go version from go.mod
+get_go_version() {
+    if [ -f "go.mod" ]; then
+        awk '/^go [0-9]+\.[0-9]+/ {print $2}' go.mod
+    else
+        echo ""
+    fi
+}
+
 # Function to update a specific module
 update_single_go_module() {
     local module_name=$1

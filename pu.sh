@@ -2,7 +2,7 @@
 # Description: Script to commit changes, create a new tag, and push to remote
 # Usage: ./pu.sh "Commit message"
 source functions.sh
-source doingmdfile.sh
+source issuemdfile.sh
 source issue.sh # Incluir script para manejar issues de GitHub
 
 current_folder=$(basename "$(pwd)")
@@ -13,8 +13,8 @@ commit_message="$*"
 # Analiza el mensaje para detectar comandos de issues ANTES de modificarlo
 parse_issue_command "$commit_message"
 
-# Obtiene el mensaje de commit desde doing.md si existe
-commit_message=$(get_commit_message_from_doing_md "$commit_message")
+# Obtiene el mensaje de commit desde ISSUE.md si existe
+commit_message=$(get_commit_message_from_issue_md "$commit_message")
 
 # Si commit_message está vacío después de la función, asigna un valor predeterminado
 if [ -z "$commit_message" ]; then
@@ -76,5 +76,5 @@ fi
 
 # Imprimir los mensajes acumulados
 successMessages
-deleteChangesDoingFile
+deleteChangesIssueFile
 exit 0
