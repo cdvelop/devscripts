@@ -7,7 +7,7 @@
 # 3. Create initial tag
 source functions.sh
 source gitutils.sh
-source doingmdfile.sh
+source issuemdfile.sh
 
 setup_existing_project() {
     local current_folder=$(basename "$(pwd)")
@@ -17,7 +17,7 @@ setup_existing_project() {
         error "Not a git repository. Please initialize git first."
         return 1
     fi
-    create_doing_md_file || return $?
+    create_issue_md_file || return $?
     create_git_tag || return $?
     return 0
 }

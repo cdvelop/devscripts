@@ -3,7 +3,7 @@
 # Usage: source gitutils.sh && init_new_repo "my-project" "github.com/username"
 
 source functions.sh
-source doingmdfile.sh
+source issuemdfile.sh
 
 
 
@@ -26,7 +26,7 @@ init_base_files() {
     local current_folder=$1
 
     create_readme "$current_folder" || return $?
-    create_doing_md_file || return $?
+    create_issue_md_file || return $?
 
     return 0
 }
