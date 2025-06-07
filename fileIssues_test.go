@@ -200,7 +200,7 @@ Some random notes
 	testScript := filepath.Join(tempDir, "test_delete.sh")
 	scriptContent := `#!/bin/bash
 source "$(dirname "$0")/fileIssues.sh"
-deleteChangesDoingFile
+deleteChangesIssueFile
 cat issues.md
 `
 	err = os.WriteFile(testScript, []byte(scriptContent), 0755)
