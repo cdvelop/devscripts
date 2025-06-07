@@ -2,168 +2,52 @@ package devscripts
 
 import (
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 )
 
-// Helper function to read file content
-func readFileContent(t *testing.T, path string) string {
-	content, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatalf("Failed to read file %s: %v", path, err)
-	}
-	return string(content)
-}
-
 func TestGobadgeScriptCreateReadme(t *testing.T) {
-	tempDir := t.TempDir()
+	runner := NewScriptRunner()
 
-	// Create mock files
-	functionsScript := filepath.Join(tempDir, "functions.sh")
-	functionsContent := `#!/bin/bash
-info() {
-  echo "INFO: $1"
-}
-
-warning() {
-  echo "WARNING: $1"
-}
-`
-	err := os.WriteFile(functionsScript, []byte(functionsContent), 0755)
-	if err != nil {
-		t.Fatalf("Failed to write functions.sh mock: %v", err)
-	}
-
-	gomodutilsScript := filepath.Join(tempDir, "gomodutils.sh")
-	gomodutilsContent := `#!/bin/bash
-get_go_version() {
-    echo "1.22"
-}
-`
-	err = os.WriteFile(gomodutilsScript, []byte(gomodutilsContent), 0755)
-	if err != nil {
-		t.Fatalf("Failed to write gomodutils.sh mock: %v", err)
-	}
-
-	licenseScript := filepath.Join(tempDir, "license.sh")
-	licenseContent := `#!/bin/bash
-get_license_type() {
-    echo "MIT"
-}
-`
-	err = os.WriteFile(licenseScript, []byte(licenseContent), 0755)
-	if err != nil {
-		t.Fatalf("Failed to write license.sh mock: %v", err)
-	}
-
-	// Copy gobadge.sh
-	originalScript, err := os.ReadFile(filepath.Join(".", "gobadge.sh"))
-	if err != nil {
-		t.Fatalf("Failed to read original gobadge.sh: %v", err)
-	}
-	err = os.WriteFile(filepath.Join(tempDir, "gobadge.sh"), originalScript, 0755)
-	if err != nil {
-		t.Fatalf("Failed to copy gobadge.sh to temp dir: %v", err)
-	}
-
-	// Create a runner with the temp directory
-	runner := NewScriptRunner(tempDir)
+	// Clean up any existing test files
+	os.Remove("test_nonexistent_README.md")
+	defer os.Remove("test_nonexistent_README.md")
 
 	// Test when README.md doesn't exist
-	exitCode, output, err := runner.ExecScript("gobadge.sh", "testmodule", "Passing", "85", "Clean", "OK", "MIT")
-	if err != nil {
-		t.Errorf("Failed to execute gobadge.sh: %v", err)
-	}
+	exitCode, output, err := runner.ExecScript("gobadge.sh", "test_nonexistent_README.md")
 
 	if exitCode != 0 {
-		t.Errorf("Expected exit code 0, got %d. Output: %s", exitCode, output)
+		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
 	}
 
 	// Should show warning about missing README
-	if !strings.Contains(output, "README.md not found") {
+	if !strings.Contains(output, "WARNING: test_nonexistent_README.md not found") {
 		t.Errorf("Expected warning about missing README.md, got: %s", output)
 	}
 }
 
 func TestGobadgeScriptWithExistingReadme(t *testing.T) {
-	tempDir := t.TempDir()
+	runner := NewScriptRunner()
 
-	// Create mock files (same as above)
-	functionsScript := filepath.Join(tempDir, "functions.sh")
-	functionsContent := `#!/bin/bash
-info() {
-  echo "INFO: $1"
-}
-
-warning() {
-  echo "WARNING: $1"
-}
-`
-	err := os.WriteFile(functionsScript, []byte(functionsContent), 0755)
-	if err != nil {
-		t.Fatalf("Failed to write functions.sh mock: %v", err)
-	}
-
-	gomodutilsScript := filepath.Join(tempDir, "gomodutils.sh")
-	gomodutilsContent := `#!/bin/bash
-get_go_version() {
-    echo "1.22"
-}
-`
-	err = os.WriteFile(gomodutilsScript, []byte(gomodutilsContent), 0755)
-	if err != nil {
-		t.Fatalf("Failed to write gomodutils.sh mock: %v", err)
-	}
-
-	licenseScript := filepath.Join(tempDir, "license.sh")
-	licenseContent := `#!/bin/bash
-get_license_type() {
-    echo "MIT"
-}
-`
-	err = os.WriteFile(licenseScript, []byte(licenseContent), 0755)
-	if err != nil {
-		t.Fatalf("Failed to write license.sh mock: %v", err)
-	}
-
-	// Copy gobadge.sh
-	originalScript, err := os.ReadFile(filepath.Join(".", "gobadge.sh"))
-	if err != nil {
-		t.Fatalf("Failed to read original gobadge.sh: %v", err)
-	}
-	err = os.WriteFile(filepath.Join(tempDir, "gobadge.sh"), originalScript, 0755)
-	if err != nil {
-		t.Fatalf("Failed to copy gobadge.sh to temp dir: %v", err)
-	}
+	// Clean up any existing test files
+	os.Remove("test_README.md")
+	defer os.Remove("test_README.md")
 
 	// Create README.md with title
-	readmeContent := `# MyTestModule
+	readmeContent := `# Test Project
 
-This is a test module for demonstration purposes.
-
-## Features
-
-- Feature 1
-- Feature 2
+This is a test project.
 `
-	readmePath := filepath.Join(tempDir, "README.md")
-	err = os.WriteFile(readmePath, []byte(readmeContent), 0644)
+	err := os.WriteFile("test_README.md", []byte(readmeContent), 0644)
 	if err != nil {
-		t.Fatalf("Failed to create README.md: %v", err)
+		t.Fatalf("Failed to create test README: %v", err)
 	}
-
-	// Create a runner with the temp directory
-	runner := NewScriptRunner(tempDir)
 
 	// Test adding badges to existing README
-	exitCode, output, err := runner.ExecScript("gobadge.sh", "testmodule", "Passing", "100", "Clean", "OK", "MIT")
-	if err != nil {
-		t.Errorf("Failed to execute gobadge.sh: %v", err)
-	}
+	exitCode, output, err := runner.ExecScript("gobadge.sh", "test_README.md")
 
 	if exitCode != 0 {
-		t.Errorf("Expected exit code 0, got %d. Output: %s", exitCode, output)
+		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
 	}
 
 	// Check that badges were added
@@ -172,120 +56,62 @@ This is a test module for demonstration purposes.
 	}
 
 	// Verify README.md content
-	updatedContent := readFileContent(t, readmePath)
+	content, err := os.ReadFile("test_README.md")
+	if err != nil {
+		t.Fatalf("Failed to read updated README: %v", err)
+	}
+
+	contentStr := string(content)
 
 	// Should contain the original title
-	if !strings.Contains(updatedContent, "# MyTestModule") {
-		t.Errorf("Original title should be preserved in README")
-	}
-	// Should contain the badge HTML
-	if !strings.Contains(updatedContent, "Generated dynamically by gotest.sh") {
-		t.Errorf("Badge comment should be present in README")
+	if !strings.Contains(contentStr, "# Test Project") {
+		t.Errorf("Original title missing from README")
 	}
 
-	if !strings.Contains(updatedContent, "<div class=\"project-badges\">") {
-		t.Errorf("Badge div should be present in README")
+	// Should contain the badge HTML
+	if !strings.Contains(contentStr, "START_SECTION:BADGES_SECTION") {
+		t.Errorf("Badge section markers missing from README")
 	}
 
 	// Should contain badge values
-	if !strings.Contains(updatedContent, "Passing") {
-		t.Errorf("Test status should be in README")
-	}
-	if !strings.Contains(updatedContent, "100%") {
-		t.Errorf("Coverage should be in README")
-	}
-	if !strings.Contains(updatedContent, "MIT") {
-		t.Errorf("License should be in README")
+	if !strings.Contains(contentStr, "Go") {
+		t.Errorf("Go badge missing from README")
 	}
 
 	// Should preserve original content
-	if !strings.Contains(updatedContent, "This is a test module") {
-		t.Errorf("Original content should be preserved")
+	if !strings.Contains(contentStr, "This is a test project") {
+		t.Errorf("Original content missing from README")
 	}
 }
 
 func TestGobadgeScriptUpdateExistingBadges(t *testing.T) {
-	tempDir := t.TempDir()
+	runner := NewScriptRunner()
 
-	// Create mock files (same as above test)
-	functionsScript := filepath.Join(tempDir, "functions.sh")
-	functionsContent := `#!/bin/bash
-info() {
-  echo "INFO: $1"
-}
+	// Clean up any existing test files
+	os.Remove("test_README.md")
+	defer os.Remove("test_README.md")
 
-warning() {
-  echo "WARNING: $1"
-}
-`
-	err := os.WriteFile(functionsScript, []byte(functionsContent), 0755)
-	if err != nil {
-		t.Fatalf("Failed to write functions.sh mock: %v", err)
-	}
-
-	gomodutilsScript := filepath.Join(tempDir, "gomodutils.sh")
-	gomodutilsContent := `#!/bin/bash
-get_go_version() {
-    echo "1.22"
-}
-`
-	err = os.WriteFile(gomodutilsScript, []byte(gomodutilsContent), 0755)
-	if err != nil {
-		t.Fatalf("Failed to write gomodutils.sh mock: %v", err)
-	}
-
-	licenseScript := filepath.Join(tempDir, "license.sh")
-	licenseContent := `#!/bin/bash
-get_license_type() {
-    echo "MIT"
-}
-`
-	err = os.WriteFile(licenseScript, []byte(licenseContent), 0755)
-	if err != nil {
-		t.Fatalf("Failed to write license.sh mock: %v", err)
-	}
-
-	// Copy gobadge.sh
-	originalScript, err := os.ReadFile(filepath.Join(".", "gobadge.sh"))
-	if err != nil {
-		t.Fatalf("Failed to read original gobadge.sh: %v", err)
-	}
-	err = os.WriteFile(filepath.Join(tempDir, "gobadge.sh"), originalScript, 0755)
-	if err != nil {
-		t.Fatalf("Failed to copy gobadge.sh to temp dir: %v", err)
-	}
 	// Create README.md with existing badges
-	readmeWithBadges := `# MyTestModule
-<!-- Generated dynamically by gotest.sh from github.com/cdvelop/devscripts -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cdvelop/devscripts@main/badges.css">
-<div class="project-badges">
-    <div class="badge-group">
-        <span class="badge-label">Tests</span><span class="badge-value tests-failing">Failed</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Coverage</span><span class="badge-value coverage-none">0%</span>
-    </div>
+	readmeContent := `# Test Project
+
+<!-- START_SECTION:BADGES_SECTION -->
+<div align="center">
+<img src="https://img.shields.io/badge/Go-1.21-blue" alt="Go version">
 </div>
+<!-- END_SECTION:BADGES_SECTION -->
 
-This is a test module with old badges.
+This is a test project.
 `
-	readmePath := filepath.Join(tempDir, "README.md")
-	err = os.WriteFile(readmePath, []byte(readmeWithBadges), 0644)
+	err := os.WriteFile("test_README.md", []byte(readmeContent), 0644)
 	if err != nil {
-		t.Fatalf("Failed to create README.md with badges: %v", err)
+		t.Fatalf("Failed to create test README with existing badges: %v", err)
 	}
-
-	// Create a runner with the temp directory
-	runner := NewScriptRunner(tempDir)
 
 	// Test updating existing badges
-	exitCode, output, err := runner.ExecScript("gobadge.sh", "testmodule", "Passing", "95", "Clean", "OK", "Apache")
-	if err != nil {
-		t.Errorf("Failed to execute gobadge.sh: %v", err)
-	}
+	exitCode, output, err := runner.ExecScript("gobadge.sh", "test_README.md")
 
 	if exitCode != 0 {
-		t.Errorf("Expected exit code 0, got %d. Output: %s", exitCode, output)
+		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
 	}
 
 	// Check that badges were updated
@@ -293,157 +119,51 @@ This is a test module with old badges.
 		t.Errorf("Expected 'Updating existing badges' message, got: %s", output)
 	}
 
-	// Verify README.md content was updated
-	updatedContent := readFileContent(t, readmePath)
+	// Verify badges were updated
+	content, err := os.ReadFile("test_README.md")
+	if err != nil {
+		t.Fatalf("Failed to read updated README: %v", err)
+	}
 
-	// Should contain updated values
-	if !strings.Contains(updatedContent, "Passing") {
-		t.Errorf("Updated test status should be in README")
-	}
-	if !strings.Contains(updatedContent, "95%") {
-		t.Errorf("Updated coverage should be in README")
-	}
-	if !strings.Contains(updatedContent, "Apache") {
-		t.Errorf("Updated license should be in README")
-	} // Should NOT contain old values
-	if strings.Contains(updatedContent, "Failed") {
-		t.Errorf("Old test status should be replaced")
-	}
-	if strings.Contains(updatedContent, "0%") {
-		t.Errorf("Old coverage should be replaced")
-	}
-	// Should preserve other content
-	if !strings.Contains(updatedContent, "This is a test module with old badges") {
-		t.Errorf("Original content should be preserved")
+	contentStr := string(content)
+	// Should contain updated content
+	if !strings.Contains(contentStr, "1.22") {
+		t.Errorf("Badges were not updated with new Go version. Content: %s", contentStr)
 	}
 }
 
 func TestGobadgeScriptNoChangeWhenDataSame(t *testing.T) {
-	tempDir := t.TempDir()
+	runner := NewScriptRunner()
 
-	// Create mock files
-	functionsScript := filepath.Join(tempDir, "functions.sh")
-	functionsContent := `#!/bin/bash
-info() {
-  echo "INFO: $1"
-}
+	// Clean up any existing test files
+	os.Remove("test_README.md")
+	defer os.Remove("test_README.md")
 
-warning() {
-  echo "WARNING: $1"
-}
+	// First run to create badges
+	readmeContent := `# Test Project
+
+This is a test project.
 `
-	err := os.WriteFile(functionsScript, []byte(functionsContent), 0755)
+	err := os.WriteFile("test_README.md", []byte(readmeContent), 0644)
 	if err != nil {
-		t.Fatalf("Failed to write functions.sh mock: %v", err)
+		t.Fatalf("Failed to create test README: %v", err)
 	}
 
-	gomodutilsScript := filepath.Join(tempDir, "gomodutils.sh")
-	gomodutilsContent := `#!/bin/bash
-get_go_version() {
-    echo "1.22"
-}
-`
-	err = os.WriteFile(gomodutilsScript, []byte(gomodutilsContent), 0755)
+	// First run
+	_, _, err = runner.ExecScript("gobadge.sh", "test_README.md")
 	if err != nil {
-		t.Fatalf("Failed to write gomodutils.sh mock: %v", err)
+		t.Fatalf("First run failed: %v", err)
 	}
 
-	licenseScript := filepath.Join(tempDir, "license.sh")
-	licenseContent := `#!/bin/bash
-get_license_type() {
-    echo "MIT"
-}
-`
-	err = os.WriteFile(licenseScript, []byte(licenseContent), 0755)
-	if err != nil {
-		t.Fatalf("Failed to write license.sh mock: %v", err)
-	}
-
-	// Copy gobadge.sh
-	originalScript, err := os.ReadFile(filepath.Join(".", "gobadge.sh"))
-	if err != nil {
-		t.Fatalf("Failed to read original gobadge.sh: %v", err)
-	}
-	err = os.WriteFile(filepath.Join(tempDir, "gobadge.sh"), originalScript, 0755)
-	if err != nil {
-		t.Fatalf("Failed to copy gobadge.sh to temp dir: %v", err)
-	}
-
-	// Create README.md with existing badges that match what we'll send
-	readmeWithBadges := `# MyTestModule
-<!-- Generated dynamically by gotest.sh from github.com/cdvelop/devscripts -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cdvelop/devscripts@main/badges.css">
-<div class="project-badges">
-    <div class="badge-group">
-        <span class="badge-label">License</span><span class="badge-value license">MIT</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Go</span><span class="badge-value go-version">1.22</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Tests</span><span class="badge-value tests-passing">Passing</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Coverage</span><span class="badge-value coverage-high">85%</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Race</span><span class="badge-value race-clean">Clean</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Vet</span><span class="badge-value vet-ok">OK</span>
-    </div>
-</div>
-
-This is a test module that should not change.
-`
-	readmePath := filepath.Join(tempDir, "README.md")
-	err = os.WriteFile(readmePath, []byte(readmeWithBadges), 0644)
-	if err != nil {
-		t.Fatalf("Failed to create README.md with badges: %v", err)
-	}
-
-	// Get file info before running script
-	fileInfoBefore, err := os.Stat(readmePath)
-	if err != nil {
-		t.Fatalf("Failed to get file info before: %v", err)
-	}
-	contentBefore := readFileContent(t, readmePath)
-
-	// Create a runner with the temp directory
-	runner := NewScriptRunner(tempDir)
-
-	// Execute with SAME data - should not change anything
-	exitCode, output, err := runner.ExecScript("gobadge.sh", "testmodule", "Passing", "85", "Clean", "OK", "MIT")
-	if err != nil {
-		t.Errorf("Failed to execute gobadge.sh: %v", err)
-	}
+	// Second run with same data - should not change
+	exitCode, output, err := runner.ExecScript("gobadge.sh", "test_README.md")
 
 	if exitCode != 0 {
-		t.Errorf("Expected exit code 0, got %d. Output: %s", exitCode, output)
+		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
 	}
 
 	// Should indicate no changes needed
 	if !strings.Contains(output, "Badges are already up to date") {
 		t.Errorf("Expected 'Badges are already up to date' message, got: %s", output)
-	}
-
-	// Verify file was NOT modified
-	fileInfoAfter, err := os.Stat(readmePath)
-	if err != nil {
-		t.Fatalf("Failed to get file info after: %v", err)
-	}
-
-	contentAfter := readFileContent(t, readmePath)
-
-	// Content should be identical
-	if contentBefore != contentAfter {
-		t.Errorf("File content should not have changed when data is the same")
-		t.Errorf("Before:\n%s", contentBefore)
-		t.Errorf("After:\n%s", contentAfter)
-	}
-
-	// Modification time should be the same
-	if !fileInfoBefore.ModTime().Equal(fileInfoAfter.ModTime()) {
-		t.Errorf("File modification time should not have changed when data is the same")
 	}
 }

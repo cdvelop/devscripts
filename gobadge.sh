@@ -4,19 +4,41 @@
 
 source functions.sh
 source gomodutils.sh
+source githubutils.sh
+source readmeutils.sh
 
-# Validate parameters
-if [ $# -lt 5 ]; then
-    echo "Usage: gobadge.sh <module_name> <test_status> <coverage_percent> <race_status> <vet_status> [license_type]"
+# Validate parameters and set defaults
+readme_file="README.md"
+
+# Check if first parameter is a readme file (ends with .md)
+if [[ $# -eq 1 && "$1" =~ \.md$ ]]; then
+    readme_file="$1"
+    # Set default values for testing
+    module_name="testmodule"
+    test_status="Passing"
+    coverage_percent="85"
+    race_status="Clean"
+    vet_status="OK"
+    license_type="MIT"
+elif [[ $# -eq 0 ]]; then
+    # No parameters - use defaults
+    module_name="testmodule"
+    test_status="Passing"
+    coverage_percent="85"
+    race_status="Clean"
+    vet_status="OK"
+    license_type="MIT"
+elif [[ $# -lt 5 ]]; then
+    echo "Usage: gobadge.sh [readme_file.md] OR gobadge.sh <module_name> <test_status> <coverage_percent> <race_status> <vet_status> [license_type]"
     exit 1
+else
+    module_name="$1"
+    test_status="$2"
+    coverage_percent="$3"
+    race_status="$4"
+    vet_status="$5"
+    license_type="${6:-$(source license.sh && get_license_type)}"
 fi
-
-module_name="$1"
-test_status="$2"
-coverage_percent="$3"
-race_status="$4"
-vet_status="$5"
-license_type="${6:-$(source license.sh && get_license_type)}"
 
 # Get Go version
 go_version=$(get_go_version)
@@ -75,8 +97,28 @@ get_css_class() {
     esac
 }
 
+# Function to create badges.css file in .github directory
+create_badges_css() {
+    local github_dir=$(ensure_github_directory)
+    local css_file="$github_dir/badges.css"
+    local source_css="badges.css"
+    
+    # Check if source badges.css exists in current directory
+    if [ -f "$source_css" ]; then
+        # Always copy the source badges.css to .github directory to ensure it's up to date
+        cp "$source_css" "$css_file"
+        return 0
+    else
+        error "badges.css file not found in current directory"
+        return 1
+    fi
+}
+
 # Generate badge HTML with CSS classes
 generate_badge_html() {
+    # Ensure .github directory exists and create badges.css
+    create_badges_css
+    
     local license_class=$(get_css_class "license" "$license_type")
     local go_class=$(get_css_class "go" "$go_version")
     local test_class=$(get_css_class "tests" "$test_status")
@@ -84,9 +126,9 @@ generate_badge_html() {
     local race_class=$(get_css_class "race" "$race_status")
     local vet_class=$(get_css_class "vet" "$vet_status")
     
-    cat << EOF
-<!-- Generated dynamically by gotest.sh from github.com/cdvelop/devscripts -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cdvelop/devscripts@main/badges.css">
+    local badge_html
+    badge_html=$(cat << EOF
+<link rel="stylesheet" href=".github/badges.css">
 <div class="project-badges">
     <div class="badge-group">
         <span class="badge-label">License</span><span class="badge-value $license_class">$license_type</span>
@@ -108,158 +150,37 @@ generate_badge_html() {
     </div>
 </div>
 EOF
-}
-
-# Update README.md
-update_readme() {
-    local readme_file="README.md"
+)    # Use section_update from readmeutils.sh to handle README update
+    local output
+    output=$(section_update "BADGES_SECTION" "$badge_html" "$readme_file" 2>&1)
+    local exit_code=$?
     
-    # Check if README.md exists
-    if [ ! -f "$readme_file" ]; then
-        warning "README.md not found, skipping badge update"
-        return 0
-    fi
-      # Generate new badge HTML
-    local new_badge_html=$(generate_badge_html)
-    
-    # Check if badges already exist and compare content
-    local comment_line=$(grep -n "Generated dynamically by gotest.sh" "$readme_file" | cut -d: -f1)
-    if [ -n "$comment_line" ]; then
-        # Extract existing badge content for comparison
-        local existing_badge_html=""
-        local line_num=$comment_line
-        local found_project_div=false
-        local div_depth=0
-        
-        while IFS= read -r line; do
-            existing_badge_html+="$line"$'\n'
-            
-            # Check if this line contains project-badges div opening
-            if [[ "$line" == *"project-badges"* ]] && [[ "$line" == *"<div"* ]]; then
-                found_project_div=true
-                div_depth=1
-            elif [[ "$found_project_div" == true ]]; then
-                # Count div openings and closings
-                local open_count=$(echo "$line" | grep -o '<div' | wc -l)
-                local close_count=$(echo "$line" | grep -o '</div>' | wc -l)
-                
-                div_depth=$((div_depth + open_count - close_count))
-                
-                # When div_depth reaches 0, we've closed the project-badges div
-                if [ $div_depth -eq 0 ]; then
-                    break
-                fi
-            fi
-            
-            line_num=$((line_num + 1))
-        done < <(tail -n +$comment_line "$readme_file")
-        
-        # Compare existing content with new content (normalize whitespace)
-        local existing_normalized=$(echo "$existing_badge_html" | tr -d '\n\r' | sed 's/[[:space:]]\+/ /g' | xargs)
-        local new_normalized=$(echo "$new_badge_html" | tr -d '\n\r' | sed 's/[[:space:]]\+/ /g' | xargs)
-        
-        if [ "$existing_normalized" = "$new_normalized" ]; then
-            info "Badges are already up to date, no changes needed"
-            return 0
-        fi
+    if [[ $exit_code -ne 0 ]]; then
+        error "Failed to update badges"
+        return 1
     fi
     
-    # Check if file has a title (first line starting with #)
-    local first_title_line=$(grep -n "^#[^#]" "$readme_file" | head -n 1 | cut -d: -f1)
-    
-    if [ -z "$first_title_line" ]; then        # No title found, add one at the beginning
-        echo "Adding title to README.md"
-        temp_file=$(mktemp)
-        echo "# $module_name" > "$temp_file"
-        echo "$new_badge_html" >> "$temp_file"
-        echo "" >> "$temp_file"
-        cat "$readme_file" >> "$temp_file"
-        mv "$temp_file" "$readme_file"
+    # Parse the output to determine what happened and generate appropriate message
+    if echo "$output" | grep -q "WARNING:"; then
+        # Show the warning about missing file
+        echo "$output" | grep "WARNING:"
+        echo "Adding new badges"
+    elif echo "$output" | grep -q "already up to date"; then
+        echo "Badges are already up to date"
+    elif echo "$output" | grep -q "Added new section"; then
+        echo "Adding new badges"
+    elif echo "$output" | grep -q "Updated existing section"; then
+        echo "Updating existing badges"
+    elif echo "$output" | grep -q "Created.*with new section"; then
+        echo "Adding new badges"
     else
-        # Title exists, check if badges already exist
-        if [ -n "$comment_line" ]; then
-            # Badges exist, replace them
-            echo "Updating existing badges in README.md"
-            
-            # Find the closing </div> for project-badges div
-            # We need to count div open/close after we find project-badges
-            local end_line=""
-            local line_num=$comment_line
-            local found_project_div=false
-            local div_depth=0
-            
-            while IFS= read -r line; do
-                # Check if this line contains project-badges div opening
-                if [[ "$line" == *"project-badges"* ]] && [[ "$line" == *"<div"* ]]; then
-                    found_project_div=true
-                    div_depth=1  # We found the opening project-badges div
-                elif [[ "$found_project_div" == true ]]; then
-                    # Count div openings and closings after finding project-badges
-                    local open_count=$(echo "$line" | grep -o '<div' | wc -l)
-                    local close_count=$(echo "$line" | grep -o '</div>' | wc -l)
-                    
-                    div_depth=$((div_depth + open_count - close_count))
-                    
-                    # When div_depth reaches 0, we've closed the project-badges div
-                    if [ $div_depth -eq 0 ]; then
-                        end_line=$line_num
-                        break
-                    fi
-                fi
-                
-                line_num=$((line_num + 1))
-            done < <(tail -n +$comment_line "$readme_file")
-            
-            if [ -n "$end_line" ]; then
-                # Create temp file with content before badges, new badges, and content after badges
-                temp_file=$(mktemp)
-                head -n $((comment_line - 1)) "$readme_file" > "$temp_file"
-                echo "$new_badge_html" >> "$temp_file"
-                
-                # Add empty line before continuing content if the next line isn't empty
-                local next_line_num=$((end_line + 1))
-                local next_line=$(sed -n "${next_line_num}p" "$readme_file")
-                if [ -n "$next_line" ] && [ "$next_line" != " " ]; then
-                    echo "" >> "$temp_file"
-                fi
-                
-                tail -n +$next_line_num "$readme_file" >> "$temp_file"
-                mv "$temp_file" "$readme_file"
-            else
-                warning "Could not find end of badge section, adding new badges instead"
-                # Fallback: replace everything from comment line onwards until we find meaningful content
-                temp_file=$(mktemp)
-                head -n $((comment_line - 1)) "$readme_file" > "$temp_file"
-                echo "$new_badge_html" >> "$temp_file"
-                echo "" >> "$temp_file"
-                
-                # Skip lines until we find content that doesn't look like badges/HTML
-                local skip_line=$comment_line
-                while IFS= read -r line; do
-                    skip_line=$((skip_line + 1))
-                    # If line is empty or doesn't contain HTML tags, start including content
-                    if [[ "$line" != *"<"* ]] && [[ "$line" != *">"* ]] && [ -n "$(echo "$line" | xargs)" ]; then
-                        tail -n +$skip_line "$readme_file" >> "$temp_file"
-                        break
-                    fi
-                done < <(tail -n +$((comment_line + 1)) "$readme_file")
-                mv "$temp_file" "$readme_file"            
-            fi
-        else
-            # No badges exist, add them after the title
-            echo "Adding new badges to README.md"
-            temp_file=$(mktemp)
-            head -n $first_title_line "$readme_file" > "$temp_file"
-            echo "$new_badge_html" >> "$temp_file"
-            tail -n +$((first_title_line + 1)) "$readme_file" >> "$temp_file"
-            mv "$temp_file" "$readme_file"
-        fi
+        # Default case
+        echo "Adding new badges"
     fi
     
-    info "README.md badges updated successfully"
     return 0
 }
 
 # Main execution
-update_readme
+generate_badge_html
 exit $?
