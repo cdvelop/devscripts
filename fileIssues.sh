@@ -4,9 +4,9 @@
 
 # Function to get commit message from issues.md file
 # Only returns completed tasks marked with [x]
-# Usage: get_commit_message_from_doing_md "Initial message"
+# Usage: get_commit_message_from_issue_md "Initial message"
 # Returns: Updated commit message with completed tasks from issues.md
-function get_commit_message_from_doing_md() {
+function get_commit_message_from_issue_md() {
     local initial_message="$1"
     local result="$initial_message"
     local completed_tasks=""
