@@ -1,6 +1,6 @@
 # DevScripts Package
 <!-- Generated dynamically by gotest.sh from github.com/cdvelop/devscripts -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cdvelop/devscripts@main/badges.css">
+<link rel="stylesheet" href=".github/badges.css">
 <div class="project-badges">
     <div class="badge-group">
         <span class="badge-label">License</span><span class="badge-value license">MIT</span>
@@ -12,7 +12,7 @@
         <span class="badge-label">Tests</span><span class="badge-value tests-passing">Passing</span>
     </div>
     <div class="badge-group">
-        <span class="badge-label">Coverage</span><span class="badge-value coverage-high">84%</span>
+        <span class="badge-label">Coverage</span><span class="badge-value coverage-high">85%</span>
     </div>
     <div class="badge-group">
         <span class="badge-label">Race</span><span class="badge-value race-clean">Clean</span>
@@ -57,6 +57,7 @@ scripts commonly used by a developer in his daily workflow
 | `licensecreate.sh`     | Create and commit a license file for a Git repository                                                                 | `./licensecreate.sh [license-type] [owner-name]` |
 | `parentdir.sh`         | Gets the parent directory of the script's location                                                                    | `source parentdir.sh  parentDir=$(get_parent_dir)` |
 | `pu.sh`                | Script to commit changes, create a new tag, and push to remote                                                        | `./pu.sh "Commit message"`     |
+| `readmeutils.sh`       | README.md utility functions for updating sections dynamically                                                         | `source readmeutils.sh`        |
 | `rename.sh`            | Rename a file and update Git tracking                                                                                 | `./rename.sh <current_name> <new_name>` |
 | `repocreate.sh`        | Creates a new GitHub repository with initial README and license files                                                 | `./repocreate.sh my-repo "My description" [public|private]` |
 | `repodelete.sh`        | Deletes a remote GitHub repository after confirmation and permission checks                                           | `./repodelete.sh <repo-name> [force_delete] [owner]` |
@@ -160,3 +161,27 @@ By default, the following script types are supported:
 - Python scripts (.py) - executed with python
 
 On Windows, Git Bash is used for executing shell scripts.
+
+<!-- START_SECTION:BADGES_SECTION -->
+<link rel="stylesheet" href=".github/badges.css">
+<div class="project-badges">
+    <div class="badge-group">
+        <span class="badge-label">License</span><span class="badge-value license">MIT</span>
+    </div>
+    <div class="badge-group">
+        <span class="badge-label">Go</span><span class="badge-value go-version">1.22.0</span>
+    </div>
+    <div class="badge-group">
+        <span class="badge-label">Tests</span><span class="badge-value tests-passing">Passing</span>
+    </div>
+    <div class="badge-group">
+        <span class="badge-label">Coverage</span><span class="badge-value coverage-high">84%</span>
+    </div>
+    <div class="badge-group">
+        <span class="badge-label">Race</span><span class="badge-value race-clean">Clean</span>
+    </div>
+    <div class="badge-group">
+        <span class="badge-label">Vet</span><span class="badge-value vet-ok">OK</span>
+    </div>
+</div>
+<!-- END_SECTION:BADGES_SECTION -->

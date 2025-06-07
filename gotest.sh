@@ -3,11 +3,8 @@
 # Usage: gotest.sh [project_directory]
 # Returns: 0 if all tests pass, 1 if any issues found
 
-# Get the directory where this script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-source "$SCRIPT_DIR/functions.sh"
-source "$SCRIPT_DIR/gomodutils.sh"
+source functions.sh
+source gomodutils.sh
 
 # Change to project directory if provided
 if [ $# -gt 0 ]; then
