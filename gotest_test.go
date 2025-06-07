@@ -55,11 +55,11 @@ get_license_type() {
 	if err != nil {
 		t.Fatalf("Failed to write license.sh mock: %v", err)
 	}
-
 	// Create a mock gobadge.sh
 	gobadgeScript := filepath.Join(tempDir, "gobadge.sh")
 	gobadgeContent := `#!/bin/bash
 echo "gobadge.sh called with: $@"
+echo "INFO: README.md badges updated successfully"
 exit 0
 `
 	err = os.WriteFile(gobadgeScript, []byte(gobadgeContent), 0755)
@@ -119,6 +119,15 @@ func main() {
 		t.Fatalf("Failed to create main.go: %v", err)
 	}
 
+	// Create a README.md file so gobadge.sh will be called
+	readmeContent := `# Test Module
+This is a test module.
+`
+	err = os.WriteFile(filepath.Join(tempDir, "README.md"), []byte(readmeContent), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create README.md: %v", err)
+	}
+
 	// Create a runner with the temp directory
 	runner := NewScriptRunner(tempDir)
 
@@ -132,10 +141,9 @@ func main() {
 	if exitCode != 0 {
 		t.Errorf("Expected exit code 0, got %d. Output: %s", exitCode, output)
 	}
-
-	// Check that gobadge.sh was called
-	if !strings.Contains(output, "gobadge.sh called with:") {
-		t.Errorf("Expected gobadge.sh to be called, but it wasn't. Output: %s", output)
+	// Check that badges were updated successfully
+	if !strings.Contains(output, "README.md badges updated successfully") {
+		t.Errorf("Expected badges to be updated successfully, but they weren't. Output: %s", output)
 	}
 
 	// Check that the output contains expected test results
@@ -199,10 +207,10 @@ get_license_type() {
 	if err != nil {
 		t.Fatalf("Failed to write license.sh mock: %v", err)
 	}
-
 	gobadgeScript := filepath.Join(tempDir, "gobadge.sh")
 	gobadgeContent := `#!/bin/bash
 echo "gobadge.sh called with: $@"
+echo "INFO: README.md badges updated successfully"
 exit 0
 `
 	err = os.WriteFile(gobadgeScript, []byte(gobadgeContent), 0755)
@@ -229,7 +237,6 @@ go 1.22
 	if err != nil {
 		t.Fatalf("Failed to create go.mod: %v", err)
 	}
-
 	// Create only main.go (no test files)
 	mainFileContent := `package main
 
@@ -242,9 +249,17 @@ func main() {
 		t.Fatalf("Failed to create main.go: %v", err)
 	}
 
+	// Create a README.md file so gobadge.sh will be called
+	readmeContent := `# Test Module
+This is a test module.
+`
+	err = os.WriteFile(filepath.Join(tempDir, "README.md"), []byte(readmeContent), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create README.md: %v", err)
+	}
+
 	// Create a runner with the temp directory
 	runner := NewScriptRunner(tempDir)
-
 	// Test gotest.sh execution
 	exitCode, output, err := runner.ExecScript("gotest.sh")
 	if err != nil {
@@ -261,8 +276,8 @@ func main() {
 		t.Errorf("Expected 'No test files found' message, got: %s", output)
 	}
 
-	// Should still call gobadge.sh
-	if !strings.Contains(output, "gobadge.sh called with:") {
-		t.Errorf("Expected gobadge.sh to be called, but it wasn't. Output: %s", output)
+	// Should still update badges successfully
+	if !strings.Contains(output, "README.md badges updated successfully") {
+		t.Errorf("Expected badges to be updated successfully, but they weren't. Output: %s", output)
 	}
 }

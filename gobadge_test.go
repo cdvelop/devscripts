@@ -178,13 +178,12 @@ This is a test module for demonstration purposes.
 	if !strings.Contains(updatedContent, "# MyTestModule") {
 		t.Errorf("Original title should be preserved in README")
 	}
-
 	// Should contain the badge HTML
 	if !strings.Contains(updatedContent, "Generated dynamically by gotest.sh") {
 		t.Errorf("Badge comment should be present in README")
 	}
 
-	if !strings.Contains(updatedContent, "<div style=\"display: flex;\">") {
+	if !strings.Contains(updatedContent, "<div class=\"project-badges\">") {
 		t.Errorf("Badge div should be present in README")
 	}
 
@@ -255,13 +254,17 @@ get_license_type() {
 	if err != nil {
 		t.Fatalf("Failed to copy gobadge.sh to temp dir: %v", err)
 	}
-
 	// Create README.md with existing badges
 	readmeWithBadges := `# MyTestModule
 <!-- Generated dynamically by gotest.sh from github.com/cdvelop/devscripts -->
-<div style="display: flex;">
-    <span style="background-color: #6c757d; color: white; padding: 4px 8px; font-size: 12px;">Tests</span><span style="background-color: #dc3545; color: white; padding: 4px 8px; font-size: 12px;">Failed</span>
-    <span style="background-color: #6c757d; color: white; padding: 4px 8px; font-size: 12px; margin-left: 1ch;">Coverage</span><span style="background-color: #dc3545; color: white; padding: 4px 8px; font-size: 12px;">0%</span>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cdvelop/devscripts@main/badges.css">
+<div class="project-badges">
+    <div class="badge-group">
+        <span class="badge-label">Tests</span><span class="badge-value tests-failing">Failed</span>
+    </div>
+    <div class="badge-group">
+        <span class="badge-label">Coverage</span><span class="badge-value coverage-none">0%</span>
+    </div>
 </div>
 
 This is a test module with old badges.
@@ -302,9 +305,7 @@ This is a test module with old badges.
 	}
 	if !strings.Contains(updatedContent, "Apache") {
 		t.Errorf("Updated license should be in README")
-	}
-
-	// Should NOT contain old values
+	}	// Should NOT contain old values
 	if strings.Contains(updatedContent, "Failed") {
 		t.Errorf("Old test status should be replaced")
 	}

@@ -77,12 +77,12 @@ get_css_class() {
 
 # Generate badge HTML with CSS classes
 generate_badge_html() {
-    local license_class=$(get_badge_class "license" "$license_type")
-    local go_class=$(get_badge_class "go" "$go_version")
-    local test_class=$(get_badge_class "tests" "$test_status")
-    local coverage_class=$(get_badge_class "coverage" "$coverage_percent")
-    local race_class=$(get_badge_class "race" "$race_status")
-    local vet_class=$(get_badge_class "vet" "$vet_status")
+    local license_class=$(get_css_class "license" "$license_type")
+    local go_class=$(get_css_class "go" "$go_version")
+    local test_class=$(get_css_class "tests" "$test_status")
+    local coverage_class=$(get_css_class "coverage" "$coverage_percent")
+    local race_class=$(get_css_class "race" "$race_status")
+    local vet_class=$(get_css_class "vet" "$vet_status")
     
     cat << EOF
 <!-- Generated dynamically by gotest.sh from github.com/cdvelop/devscripts -->
@@ -143,17 +143,69 @@ update_readme() {
             # Badges exist, replace them
             echo "Updating existing badges in README.md"
             
-            # Find the end of the badge div (next line after </div>)
-            local div_end_line=$(tail -n +$comment_line "$readme_file" | grep -n "</div>" | head -n 1 | cut -d: -f1)
-            if [ -n "$div_end_line" ]; then
-                div_end_line=$((comment_line + div_end_line - 1))
+            # Find the closing </div> for project-badges div
+            # We need to count div open/close after we find project-badges
+            local end_line=""
+            local line_num=$comment_line
+            local found_project_div=false
+            local div_depth=0
+            
+            while IFS= read -r line; do
+                # Check if this line contains project-badges div opening
+                if [[ "$line" == *"project-badges"* ]] && [[ "$line" == *"<div"* ]]; then
+                    found_project_div=true
+                    div_depth=1  # We found the opening project-badges div
+                elif [[ "$found_project_div" == true ]]; then
+                    # Count div openings and closings after finding project-badges
+                    local open_count=$(echo "$line" | grep -o '<div' | wc -l)
+                    local close_count=$(echo "$line" | grep -o '</div>' | wc -l)
+                    
+                    div_depth=$((div_depth + open_count - close_count))
+                    
+                    # When div_depth reaches 0, we've closed the project-badges div
+                    if [ $div_depth -eq 0 ]; then
+                        end_line=$line_num
+                        break
+                    fi
+                fi
                 
+                line_num=$((line_num + 1))
+            done < <(tail -n +$comment_line "$readme_file")
+            
+            if [ -n "$end_line" ]; then
                 # Create temp file with content before badges, new badges, and content after badges
                 temp_file=$(mktemp)
                 head -n $((comment_line - 1)) "$readme_file" > "$temp_file"
                 echo "$new_badge_html" >> "$temp_file"
-                tail -n +$((div_end_line + 1)) "$readme_file" >> "$temp_file"
+                
+                # Add empty line before continuing content if the next line isn't empty
+                local next_line_num=$((end_line + 1))
+                local next_line=$(sed -n "${next_line_num}p" "$readme_file")
+                if [ -n "$next_line" ] && [ "$next_line" != " " ]; then
+                    echo "" >> "$temp_file"
+                fi
+                
+                tail -n +$next_line_num "$readme_file" >> "$temp_file"
                 mv "$temp_file" "$readme_file"
+            else
+                warning "Could not find end of badge section, adding new badges instead"
+                # Fallback: replace everything from comment line onwards until we find meaningful content
+                temp_file=$(mktemp)
+                head -n $((comment_line - 1)) "$readme_file" > "$temp_file"
+                echo "$new_badge_html" >> "$temp_file"
+                echo "" >> "$temp_file"
+                
+                # Skip lines until we find content that doesn't look like badges/HTML
+                local skip_line=$comment_line
+                while IFS= read -r line; do
+                    skip_line=$((skip_line + 1))
+                    # If line is empty or doesn't contain HTML tags, start including content
+                    if [[ "$line" != *"<"* ]] && [[ "$line" != *">"* ]] && [ -n "$(echo "$line" | xargs)" ]; then
+                        tail -n +$skip_line "$readme_file" >> "$temp_file"
+                        break
+                    fi
+                done < <(tail -n +$((comment_line + 1)) "$readme_file")
+                mv "$temp_file" "$readme_file"            
             fi
         else
             # No badges exist, add them after the title

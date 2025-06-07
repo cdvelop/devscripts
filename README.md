@@ -9,18 +9,19 @@
         <span class="badge-label">Go</span><span class="badge-value go-version">1.22.0</span>
     </div>
     <div class="badge-group">
-        <span class="badge-label">Tests</span><span class="badge-value tests-failing">Failed</span>
+        <span class="badge-label">Tests</span><span class="badge-value tests-passing">Passing</span>
     </div>
     <div class="badge-group">
         <span class="badge-label">Coverage</span><span class="badge-value coverage-high">84%</span>
     </div>
     <div class="badge-group">
-        <span class="badge-label">Race</span><span class="badge-value race-detected">Detected</span>
+        <span class="badge-label">Race</span><span class="badge-value race-clean">Clean</span>
     </div>
     <div class="badge-group">
         <span class="badge-label">Vet</span><span class="badge-value vet-ok">OK</span>
     </div>
 </div>
+
 scripts commonly used by a developer in his daily workflow
 
 <!-- SCRIPTS_SECTION_START -->
