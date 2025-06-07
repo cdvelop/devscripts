@@ -119,15 +119,55 @@ update_readme() {
         warning "README.md not found, skipping badge update"
         return 0
     fi
-    
-    # Generate new badge HTML
+      # Generate new badge HTML
     local new_badge_html=$(generate_badge_html)
+    
+    # Check if badges already exist and compare content
+    local comment_line=$(grep -n "Generated dynamically by gotest.sh" "$readme_file" | cut -d: -f1)
+    if [ -n "$comment_line" ]; then
+        # Extract existing badge content for comparison
+        local existing_badge_html=""
+        local line_num=$comment_line
+        local found_project_div=false
+        local div_depth=0
+        
+        while IFS= read -r line; do
+            existing_badge_html+="$line"$'\n'
+            
+            # Check if this line contains project-badges div opening
+            if [[ "$line" == *"project-badges"* ]] && [[ "$line" == *"<div"* ]]; then
+                found_project_div=true
+                div_depth=1
+            elif [[ "$found_project_div" == true ]]; then
+                # Count div openings and closings
+                local open_count=$(echo "$line" | grep -o '<div' | wc -l)
+                local close_count=$(echo "$line" | grep -o '</div>' | wc -l)
+                
+                div_depth=$((div_depth + open_count - close_count))
+                
+                # When div_depth reaches 0, we've closed the project-badges div
+                if [ $div_depth -eq 0 ]; then
+                    break
+                fi
+            fi
+            
+            line_num=$((line_num + 1))
+        done < <(tail -n +$comment_line "$readme_file")
+        
+        # Compare existing content with new content (normalize whitespace)
+        local existing_normalized=$(echo "$existing_badge_html" | tr -d '\n\r' | sed 's/[[:space:]]\+/ /g' | xargs)
+        local new_normalized=$(echo "$new_badge_html" | tr -d '\n\r' | sed 's/[[:space:]]\+/ /g' | xargs)
+        
+        if [ "$existing_normalized" = "$new_normalized" ]; then
+            info "Badges are already up to date, no changes needed"
+            return 0
+        fi
+    fi
     
     # Check if file has a title (first line starting with #)
     local first_title_line=$(grep -n "^#[^#]" "$readme_file" | head -n 1 | cut -d: -f1)
     
-    if [ -z "$first_title_line" ]; then
-        # No title found, add one at the beginning
+    if [ -z "$first_title_line" ]; then        # No title found, add one at the beginning
         echo "Adding title to README.md"
         temp_file=$(mktemp)
         echo "# $module_name" > "$temp_file"
@@ -137,8 +177,6 @@ update_readme() {
         mv "$temp_file" "$readme_file"
     else
         # Title exists, check if badges already exist
-        local comment_line=$(grep -n "Generated dynamically by gotest.sh" "$readme_file" | cut -d: -f1)
-        
         if [ -n "$comment_line" ]; then
             # Badges exist, replace them
             echo "Updating existing badges in README.md"
