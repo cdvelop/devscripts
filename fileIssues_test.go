@@ -29,11 +29,11 @@ func readFile(t *testing.T, path string) string {
 func TestGetCommitMessageFromDoingMd(t *testing.T) {
 	tempDir := t.TempDir()
 
-	// Create test wrapper script that calls get_commit_message_from_doing_md
+	// Create test wrapper script that calls get_commit_message_from_issue_md
 	testScript := filepath.Join(tempDir, "test_get_msg.sh")
 	scriptContent := `#!/bin/bash
 source "$(dirname "$0")/fileIssues.sh"
-get_commit_message_from_doing_md "$@"
+get_commit_message_from_issue_md "$@"
 `
 	err := os.WriteFile(testScript, []byte(scriptContent), 0755)
 	if err != nil {
