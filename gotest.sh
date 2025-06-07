@@ -116,7 +116,7 @@ license_type=$(source license.sh && get_license_type)
 
 # Call gobadge.sh to update README
 echo "Updating badges in README.md..."
-gobadge.sh "$go_mod_name" "$test_status" "$coverage_percent" "$race_status" "$vet_status" "$license_type"
+bash gobadge.sh "$go_mod_name" "$test_status" "$coverage_percent" "$race_status" "$vet_status" "$license_type"
 
 # Print accumulated error messages if any
 if [ $has_errors -eq 1 ]; then
