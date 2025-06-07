@@ -305,7 +305,7 @@ This is a test module with old badges.
 	}
 	if !strings.Contains(updatedContent, "Apache") {
 		t.Errorf("Updated license should be in README")
-	}	// Should NOT contain old values
+	} // Should NOT contain old values
 	if strings.Contains(updatedContent, "Failed") {
 		t.Errorf("Old test status should be replaced")
 	}
