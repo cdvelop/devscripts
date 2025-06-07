@@ -1,18 +1,18 @@
 #!/bin/bash
-# Functions to work with doing.md file
-# usage: source doingmdfile.sh
+# Functions to work with issues.md file
+# usage: source fileIssues.sh
 
-# Function to get commit message from doing.md file
+# Function to get commit message from issues.md file
 # Only returns completed tasks marked with [x]
 # Usage: get_commit_message_from_doing_md "Initial message"
-# Returns: Updated commit message with completed tasks from doing.md
+# Returns: Updated commit message with completed tasks from issues.md
 function get_commit_message_from_doing_md() {
     local initial_message="$1"
     local result="$initial_message"
     local completed_tasks=""
     
-    # Check if doing.md exists and has content
-    if [ -f "doing.md" ] && [ -s "doing.md" ]; then
+    # Check if issues.md exists and has content
+    if [ -f "issues.md" ] && [ -s "issues.md" ]; then
         # Extract only completed tasks from the file
         while IFS= read -r line; do
             if [[ $line == *"[x]"* ]]; then
@@ -26,7 +26,7 @@ function get_commit_message_from_doing_md() {
                     completed_tasks="$task_text"
                 fi
             fi
-        done < "doing.md"
+        done < "issues.md"
         
         # If we found completed tasks, add them to the result
         if [ -n "$completed_tasks" ]; then
@@ -42,19 +42,19 @@ function get_commit_message_from_doing_md() {
     echo "$result"
 }
 
-# Create doing.md file with initial template
+# Create issues.md file with initial template
 create_doing_md_file() {
     local content="[x] init code\n[ ] task 1"
-    execute "echo -e \"$content\" > doing.md" \
-        "Failed to create doing.md" \
-        "doing.md created" || return $?
+    execute "echo -e \"$content\" > issues.md" \
+        "Failed to create issues.md" \
+        "issues.md created" || return $?
 
     return 0
 }
 
-# Function to remove completed tasks from doing.md but keep incomplete ones
+# Function to remove completed tasks from issues.md but keep incomplete ones
 function deleteChangesDoingFile() {
-    if [ -f "doing.md" ] && [ -s "doing.md" ]; then
+    if [ -f "issues.md" ] && [ -s "issues.md" ]; then
         # Create a temporary file
         local temp_file=$(mktemp)
         
@@ -64,9 +64,9 @@ function deleteChangesDoingFile() {
             if [[ ! $line =~ ^\[x\] ]]; then
                 echo "$line" >> "$temp_file"
             fi
-        done < "doing.md"
+        done < "issues.md"
         
         # Replace original file with filtered version
-        mv "$temp_file" "doing.md"
+        mv "$temp_file" "issues.md"
     fi
 }
