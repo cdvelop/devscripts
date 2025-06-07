@@ -53,7 +53,7 @@ create_doing_md_file() {
 }
 
 # Function to remove completed tasks from issues.md but keep incomplete ones
-function deleteChangesDoingFile() {
+function deleteChangesIssueFile() {
     if [ -f "issues.md" ] && [ -s "issues.md" ]; then
         # Create a temporary file
         local temp_file=$(mktemp)
