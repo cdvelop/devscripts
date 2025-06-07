@@ -2,7 +2,7 @@
 # Description: Script to commit changes, create a new tag, and push to remote
 # Usage: ./pu.sh "Commit message"
 source functions.sh
-source issuemdfile.sh
+source fileIssues.sh
 source issue.sh # Incluir script para manejar issues de GitHub
 
 current_folder=$(basename "$(pwd)")

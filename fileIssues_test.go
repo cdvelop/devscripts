@@ -7,12 +7,12 @@ import (
 	"testing"
 )
 
-// Helper function to create a test doing.md file with specified content
+// Helper function to create a test issues.md file with specified content
 func createTestDoingMd(t *testing.T, dir, content string) string {
-	filePath := filepath.Join(dir, "doing.md")
+	filePath := filepath.Join(dir, "issues.md")
 	err := os.WriteFile(filePath, []byte(content), 0644)
 	if err != nil {
-		t.Fatalf("Failed to create test doing.md: %v", err)
+		t.Fatalf("Failed to create test issues.md: %v", err)
 	}
 	return filePath
 }
@@ -32,7 +32,7 @@ func TestGetCommitMessageFromDoingMd(t *testing.T) {
 	// Create test wrapper script that calls get_commit_message_from_doing_md
 	testScript := filepath.Join(tempDir, "test_get_msg.sh")
 	scriptContent := `#!/bin/bash
-source "$(dirname "$0")/doingmdfile.sh"
+source "$(dirname "$0")/fileIssues.sh"
 get_commit_message_from_doing_md "$@"
 `
 	err := os.WriteFile(testScript, []byte(scriptContent), 0755)
@@ -40,17 +40,17 @@ get_commit_message_from_doing_md "$@"
 		t.Fatalf("Failed to write test script: %v", err)
 	}
 
-	// Copy the actual doingmdfile.sh to temp dir
-	originalScript, err := os.ReadFile(filepath.Join(".", "doingmdfile.sh"))
+	// Copy the actual fileIssues.sh to temp dir
+	originalScript, err := os.ReadFile(filepath.Join(".", "fileIssues.sh"))
 	if err != nil {
-		t.Fatalf("Failed to read original doingmdfile.sh: %v", err)
+		t.Fatalf("Failed to read original fileIssues.sh: %v", err)
 	}
-	err = os.WriteFile(filepath.Join(tempDir, "doingmdfile.sh"), originalScript, 0755)
+	err = os.WriteFile(filepath.Join(tempDir, "fileIssues.sh"), originalScript, 0755)
 	if err != nil {
-		t.Fatalf("Failed to copy doingmdfile.sh to temp dir: %v", err)
+		t.Fatalf("Failed to copy fileIssues.sh to temp dir: %v", err)
 	}
 
-	// Create sample doing.md with mixed content
+	// Create sample issues.md with mixed content
 	doingContent := `# My Tasks
 [x] Completed task 1
 [ ] Incomplete task
@@ -90,7 +90,7 @@ Some random notes
 		t.Errorf("Expected output to contain %q, got %q", expectedOutput, output)
 	}
 
-	// Test with empty doing.md
+	// Test with empty issues.md
 	createTestDoingMd(t, tempDir, "")
 	exitCode, output, err = runner.ExecScript("test_get_msg.sh", "Just message")
 	if err != nil {
@@ -123,23 +123,23 @@ execute() {
 		t.Fatalf("Failed to write functions.sh mock: %v", err)
 	}
 
-	// Copy the actual doingmdfile.sh to temp dir
-	originalScript, err := os.ReadFile(filepath.Join(".", "doingmdfile.sh"))
+	// Copy the actual fileIssues.sh to temp dir
+	originalScript, err := os.ReadFile(filepath.Join(".", "fileIssues.sh"))
 	if err != nil {
-		t.Fatalf("Failed to read original doingmdfile.sh: %v", err)
+		t.Fatalf("Failed to read original fileIssues.sh: %v", err)
 	}
-	err = os.WriteFile(filepath.Join(tempDir, "doingmdfile.sh"), originalScript, 0755)
+	err = os.WriteFile(filepath.Join(tempDir, "fileIssues.sh"), originalScript, 0755)
 	if err != nil {
-		t.Fatalf("Failed to copy doingmdfile.sh to temp dir: %v", err)
+		t.Fatalf("Failed to copy fileIssues.sh to temp dir: %v", err)
 	}
 
 	// Create test wrapper script
 	testScript := filepath.Join(tempDir, "test_create.sh")
 	scriptContent := `#!/bin/bash
 source "$(dirname "$0")/functions.sh"
-source "$(dirname "$0")/doingmdfile.sh"
+source "$(dirname "$0")/fileIssues.sh"
 create_doing_md_file
-cat doing.md
+cat issues.md
 `
 	err = os.WriteFile(testScript, []byte(scriptContent), 0755)
 	if err != nil {
@@ -149,7 +149,7 @@ cat doing.md
 	// Create a runner with the temp directory
 	runner := NewScriptRunner(tempDir)
 
-	// Test creating the doing.md file
+	// Test creating the issues.md file
 	exitCode, output, err := runner.ExecScript("test_create.sh")
 	if err != nil {
 		t.Errorf("Failed to execute script: %v", err)
@@ -167,26 +167,26 @@ cat doing.md
 	}
 
 	// Verify file was actually created in the temp directory
-	doingPath := filepath.Join(tempDir, "doing.md")
+	doingPath := filepath.Join(tempDir, "issues.md")
 	if _, err := os.Stat(doingPath); os.IsNotExist(err) {
-		t.Errorf("doing.md file was not created in %s", tempDir)
+		t.Errorf("issues.md file was not created in %s", tempDir)
 	}
 }
 
 func TestDeleteChangesDoingFile(t *testing.T) {
 	tempDir := t.TempDir()
 
-	// Copy the actual doingmdfile.sh to temp dir
-	originalScript, err := os.ReadFile(filepath.Join(".", "doingmdfile.sh"))
+	// Copy the actual fileIssues.sh to temp dir
+	originalScript, err := os.ReadFile(filepath.Join(".", "fileIssues.sh"))
 	if err != nil {
-		t.Fatalf("Failed to read original doingmdfile.sh: %v", err)
+		t.Fatalf("Failed to read original fileIssues.sh: %v", err)
 	}
-	err = os.WriteFile(filepath.Join(tempDir, "doingmdfile.sh"), originalScript, 0755)
+	err = os.WriteFile(filepath.Join(tempDir, "fileIssues.sh"), originalScript, 0755)
 	if err != nil {
-		t.Fatalf("Failed to copy doingmdfile.sh to temp dir: %v", err)
+		t.Fatalf("Failed to copy fileIssues.sh to temp dir: %v", err)
 	}
 
-	// Create sample doing.md with mixed content
+	// Create sample issues.md with mixed content
 	doingContent := `# My Tasks
 [x] Completed task 1
 [ ] Incomplete task 1
@@ -199,9 +199,9 @@ Some random notes
 	// Create test wrapper script
 	testScript := filepath.Join(tempDir, "test_delete.sh")
 	scriptContent := `#!/bin/bash
-source "$(dirname "$0")/doingmdfile.sh"
+source "$(dirname "$0")/fileIssues.sh"
 deleteChangesDoingFile
-cat doing.md
+cat issues.md
 `
 	err = os.WriteFile(testScript, []byte(scriptContent), 0755)
 	if err != nil {

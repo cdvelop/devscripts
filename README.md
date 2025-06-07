@@ -33,7 +33,7 @@ scripts commonly used by a developer in his daily workflow
 | `backupwindows.sh`     | Performs backup operations using FreeFileSync on Windows systems                                                      | `./backupwindows.sh`           |
 | `changeremote.sh`      | Script to change the remote URL of a Git repository                                                                   | `./changeremote.sh https://github.com/username/repository.git` |
 | `delete.sh`            | Script to delete a file locally and track the deletion in Git                                                         | `./delete.sh filename.txt`     |
-| `doingmdfile.sh`       | Functions to work with doing.md file                                                                                  | `usage: source doingmdfile.sh` |
+| `fileIssues.sh`        | Functions to work with issues.md file                                                                                 | `usage: source fileIssues.sh`  |
 | `functions.sh`         | Helper functions for git and script execution management                                                              | `source functions.sh`          |
 | `githubutils.sh`       | Utility functions for GitHub repository management and user information retrieval                                     | `source githubutils.sh`        |
 | `gitremtracking.sh`    | Removes files from git tracking both locally and remotely                                                             | `./gitremtracking.sh file1.txt file2.txt` |

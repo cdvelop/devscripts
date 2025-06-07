@@ -7,7 +7,7 @@
 # 3. Create initial tag
 source functions.sh
 source gitutils.sh
-source issuemdfile.sh
+source fileIssues.sh
 
 setup_existing_project() {
     local current_folder=$(basename "$(pwd)")

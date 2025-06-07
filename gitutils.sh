@@ -3,7 +3,7 @@
 # Usage: source gitutils.sh && init_new_repo "my-project" "github.com/username"
 
 source functions.sh
-source issuemdfile.sh
+source fileIssues.sh
 
 
 
