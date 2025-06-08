@@ -1,27 +1,8 @@
 # DevScripts Package
-<!-- Generated dynamically by gotest.sh from github.com/cdvelop/devscripts -->
-<link rel="stylesheet" href=".github/badges.css">
-<div class="project-badges">
-    <div class="badge-group">
-        <span class="badge-label">License</span><span class="badge-value license">MIT</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Go</span><span class="badge-value go-version">1.22.0</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Tests</span><span class="badge-value tests-passing">Passing</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Coverage</span><span class="badge-value coverage-high">85%</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Race</span><span class="badge-value race-clean">Clean</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Vet</span><span class="badge-value vet-ok">OK</span>
-    </div>
-</div>
-
+<!-- START_SECTION:BADGES_SECTION -->
+<img src=".github/badges.svg" alt="Project Badges">
+<!-- Generated dynamically by badges.sh from github.com/cdvelop/devscripts -->
+<!-- END_SECTION:BADGES_SECTION -->
 scripts commonly used by a developer in his daily workflow
 
 <!-- SCRIPTS_SECTION_START -->
@@ -31,6 +12,7 @@ scripts commonly used by a developer in his daily workflow
 | Script Name            | Description                                                                                                           | Usage                          |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
 | `backupwindows.sh`     | Performs backup operations using FreeFileSync on Windows systems                                                      | `./backupwindows.sh`           |
+| `badges.sh`            | Generate SVG badges for GitHub projects and update README                                                             | `Example: badges.sh "license:MIT:#007acc" "go:1.22:#00add8" "coverage:85%:#28a745"` |
 | `changeremote.sh`      | Script to change the remote URL of a Git repository                                                                   | `./changeremote.sh https://github.com/username/repository.git` |
 | `delete.sh`            | Script to delete a file locally and track the deletion in Git                                                         | `./delete.sh filename.txt`     |
 | `fileIssues.sh`        | Functions to work with issues.md file                                                                                 | `usage: source fileIssues.sh`  |
@@ -39,7 +21,7 @@ scripts commonly used by a developer in his daily workflow
 | `gitremtracking.sh`    | Removes files from git tracking both locally and remotely                                                             | `./gitremtracking.sh file1.txt file2.txt` |
 | `gitutils.sh`          | Git utilities for repository initialization and management                                                            | `source gitutils.sh && init_new_repo "my-project" "github.com/username"` |
 | `goaddtest.sh`         | Script to generate Go test files with unit test and benchmark templates                                               | `./goaddtest.sh CreateFile create` |
-| `gobadge.sh`           | Update README.md with project status badges                                                                           | `gobadge.sh <module_name> <test_status> <coverage_percent> <race_status> <vet_status> [license_type]` |
+| `gobadge.sh`           | Determine Go project badges and generate them using badges.sh                                                         | `gobadge.sh <module_name> <test_status> <coverage_percent> <race_status> <vet_status> [license_type]` |
 | `goget.sh`             | Updates a Go package to its latest tagged version                                                                     | `./goget.sh package-name`      |
 | `gomodcheck.sh`        | Checks and updates Go module dependencies, runs tests and performs data race detection                                | `./gomodcheck.sh`              |
 | `gomodinit.sh`         | Script to initialize a Go module and create basic project structure                                                   | `./gomodinit.sh`               |
@@ -161,27 +143,3 @@ By default, the following script types are supported:
 - Python scripts (.py) - executed with python
 
 On Windows, Git Bash is used for executing shell scripts.
-
-<!-- START_SECTION:BADGES_SECTION -->
-<link rel="stylesheet" href=".github/badges.css">
-<div class="project-badges">
-    <div class="badge-group">
-        <span class="badge-label">License</span><span class="badge-value license">MIT</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Go</span><span class="badge-value go-version">1.22.0</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Tests</span><span class="badge-value tests-passing">Passing</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Coverage</span><span class="badge-value coverage-high">84%</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Race</span><span class="badge-value race-clean">Clean</span>
-    </div>
-    <div class="badge-group">
-        <span class="badge-label">Vet</span><span class="badge-value vet-ok">OK</span>
-    </div>
-</div>
-<!-- END_SECTION:BADGES_SECTION -->

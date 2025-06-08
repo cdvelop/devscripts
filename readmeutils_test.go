@@ -12,14 +12,12 @@ func TestReadmeUtilsCreateNewReadme(t *testing.T) {
 	// Clean up any existing test files
 	os.Remove("test_README.md")
 	defer os.Remove("test_README.md")
-
 	// Test content for badges section
 	badgeContent := `<div align="center">
 <img src="https://img.shields.io/badge/Go-1.22-blue" alt="Go version">
 </div>`
-
 	// Test creating new README with badges section using section_update
-	exitCode, output, err := runner.ExecScript("readmeutils.sh", "section_update", "BADGES_SECTION", badgeContent, "test_README.md")
+	exitCode, output, err := runner.ExecScript("readmeutils.sh", "section_update", "BADGES_SECTION", "", badgeContent, "test_README.md")
 
 	if exitCode != 0 {
 		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
@@ -74,7 +72,6 @@ Some other content here.
 	if err != nil {
 		t.Fatalf("Failed to create existing README: %v", err)
 	}
-
 	// New badge content
 	newBadgeContent := `<div align="center">
 <img src="https://img.shields.io/badge/Go-1.22-blue" alt="Go version">
@@ -82,7 +79,7 @@ Some other content here.
 </div>`
 
 	// Test updating existing section
-	exitCode, output, err := runner.ExecScript("readmeutils.sh", "section_update", "BADGES_SECTION", newBadgeContent, "test_README.md")
+	exitCode, output, err := runner.ExecScript("readmeutils.sh", "section_update", "BADGES_SECTION", "", newBadgeContent, "test_README.md")
 
 	if exitCode != 0 {
 		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
@@ -144,7 +141,6 @@ Some content.
 	if err != nil {
 		t.Fatalf("Failed to create README: %v", err)
 	}
-
 	// Get file info before
 	fileInfoBefore, err := os.Stat("test_README.md")
 	if err != nil {
@@ -152,7 +148,7 @@ Some content.
 	}
 
 	// Test with same content - should not change
-	exitCode, output, err := runner.ExecScript("readmeutils.sh", "section_update", "BADGES_SECTION", badgeContent, "test_README.md")
+	exitCode, output, err := runner.ExecScript("readmeutils.sh", "section_update", "BADGES_SECTION", "", badgeContent, "test_README.md")
 
 	if exitCode != 0 {
 		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
@@ -167,9 +163,137 @@ Some content.
 	if err != nil {
 		t.Fatalf("Failed to get file info after: %v", err)
 	}
-
 	// File modification time should be the same
 	if !fileInfoBefore.ModTime().Equal(fileInfoAfter.ModTime()) {
 		t.Errorf("File should not have been modified when content is the same")
+	}
+}
+
+func TestReadmeUtilsPositionAfterLine(t *testing.T) {
+	runner := NewScriptRunner()
+
+	// Clean up any existing test files
+	os.Remove("test_README.md")
+	defer os.Remove("test_README.md")
+
+	// Create README with title and content
+	readmeContent := `# Test Project
+
+This is a test project.
+
+## Section 1
+Content here.
+`
+	err := os.WriteFile("test_README.md", []byte(readmeContent), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test README: %v", err)
+	}
+
+	// Test badge content
+	badgeContent := `<img src=".github/badges.svg" alt="Project Badges">`
+	// Test creating badges after line 1 (after title)
+	exitCode, output, err := runner.ExecScript("readmeutils.sh", "section_update", "BADGES_SECTION", "1", badgeContent, "test_README.md")
+
+	if exitCode != 0 {
+		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
+	}
+
+	// Verify README was updated
+	content, err := os.ReadFile("test_README.md")
+	if err != nil {
+		t.Fatalf("Failed to read updated README: %v", err)
+	}
+
+	contentStr := string(content)
+	lines := strings.Split(contentStr, "\n")
+	// Should have badges section after title (line 1)
+	if len(lines) < 3 {
+		t.Fatalf("README should have at least 3 lines, got %d", len(lines))
+	}
+	// Line 0: # Test Project
+	// Line 1: <!-- START_SECTION:BADGES_SECTION -->
+	if !strings.Contains(lines[1], "START_SECTION:BADGES_SECTION") {
+		t.Errorf("Badges section should start at line 2, but found: %s", lines[1])
+	}
+
+	// Should contain badge content
+	if !strings.Contains(contentStr, "badges.svg") {
+		t.Errorf("Badge content missing from README")
+	}
+
+	// Should preserve original content
+	if !strings.Contains(contentStr, "This is a test project") {
+		t.Errorf("Original content should be preserved")
+	}
+}
+
+func TestReadmeUtilsMoveSectionToNewPosition(t *testing.T) {
+	runner := NewScriptRunner()
+
+	// Clean up any existing test files
+	os.Remove("test_README.md")
+	defer os.Remove("test_README.md")
+
+	// Create README with badges at the end
+	readmeContent := `# Test Project
+
+This is a test project.
+
+## Section 1
+Content here.
+
+<!-- START_SECTION:BADGES_SECTION -->
+<img src="old-badges.svg" alt="Old Badges">
+<!-- END_SECTION:BADGES_SECTION -->
+`
+	err := os.WriteFile("test_README.md", []byte(readmeContent), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test README with badges at end: %v", err)
+	}
+
+	// New badge content
+	newBadgeContent := `<img src=".github/badges.svg" alt="Project Badges">`
+
+	// Test moving badges to after line 1 (after title)
+	exitCode, output, err := runner.ExecScript("readmeutils.sh", "section_update", "BADGES_SECTION", "1", newBadgeContent, "test_README.md")
+
+	if exitCode != 0 {
+		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
+	}
+
+	// Verify README was updated
+	content, err := os.ReadFile("test_README.md")
+	if err != nil {
+		t.Fatalf("Failed to read updated README: %v", err)
+	}
+
+	contentStr := string(content)
+	lines := strings.Split(contentStr, "\n")
+	// Should have badges section after title (line 1)
+	if !strings.Contains(lines[1], "START_SECTION:BADGES_SECTION") {
+		t.Errorf("Badges section should start at line 2, but found: %s", lines[1])
+	}
+
+	// Should contain new badge content
+	if !strings.Contains(contentStr, ".github/badges.svg") {
+		t.Errorf("New badge content missing from README")
+	}
+
+	// Should NOT contain old badge content
+	if strings.Contains(contentStr, "old-badges.svg") {
+		t.Errorf("Old badge content should be replaced")
+	}
+
+	// Should preserve other content
+	if !strings.Contains(contentStr, "This is a test project") {
+		t.Errorf("Original content should be preserved")
+	}
+
+	if !strings.Contains(contentStr, "## Section 1") {
+		t.Errorf("Other sections should be preserved")
+	} // Should not have badges at the end anymore
+	lastLines := strings.Join(lines[len(lines)-5:], "\n")
+	if strings.Contains(lastLines, "BADGES_SECTION") {
+		t.Errorf("Badges section should not be at the end anymore")
 	}
 }
