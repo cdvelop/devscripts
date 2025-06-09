@@ -104,10 +104,8 @@ generate_badges() {
     local test_color=$(get_badge_color "tests" "$test_status")
     local coverage_color=$(get_badge_color "coverage" "$coverage_percent")
     local race_color=$(get_badge_color "race" "$race_status")
-    local vet_color=$(get_badge_color "vet" "$vet_status")
-    
-    # Call badges.sh with all badge parameters and custom readme file
-    ./badges.sh \
+    local vet_color=$(get_badge_color "vet" "$vet_status")    # Call badges.sh with all badge parameters and custom readme file
+    badges.sh \
         "readmefile:$readme_file" \
         "License:$license_type:$license_color" \
         "Go:$go_version:$go_color" \

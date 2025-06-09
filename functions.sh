@@ -33,6 +33,15 @@ info() {
 }
 
 # Function to perform an action and show error message on failure
+# Usage: execute "command" "error_message" "success_message" ["no_exit"]
+# Examples:
+#   execute "git add ." "Failed to add files" "files added"
+#   execute "go test ./..." "Tests failed" "tests passed" "no_exit"
+# Parameters:
+#   $1: Command to execute
+#   $2: Error message if command fails
+#   $3: Success message (optional) - will be added to accumulated messages
+#   $4: If "no_exit" is passed, won't exit on error (optional)
 execute() {
  output=$(eval "$1" 2>&1)
  local exit_code=$?
