@@ -1,11 +1,6 @@
 # DevScripts Package
 <!-- START_SECTION:BADGES_SECTION -->
-<img src=".github/badges.svg" alt="Project Badges">
-<!-- Generated dynamically by badges.sh from github.com/cdvelop/devscripts -->
-<!-- END_SECTION:BADGES_SECTION -->
-<!-- START_SECTION:BADGES_SECTION -->
-<img src=".github/badges.svg" alt="Project Badges">
-<!-- Generated dynamically by badges.sh from github.com/cdvelop/devscripts -->
+[![Project Badges](.git/badges.svg)](https://github.com/cdvelop/devscripts/blob/main/badges.sh)
 <!-- END_SECTION:BADGES_SECTION -->
 scripts commonly used by a developer in his daily workflow
 
