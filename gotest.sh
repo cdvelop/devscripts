@@ -18,21 +18,6 @@ if [ $# -gt 0 ]; then
     fi
 fi
 
-# Initialize error tracking
-has_errors=0
-error_messages=""
-
-# Function to add error message
-add_error() {
-    local message="$1"
-    has_errors=1
-    if [ -z "$error_messages" ]; then
-        error_messages="$message"
-    else
-        error_messages="$error_messages\n$message"
-    fi
-}
-
 # Get Go module name
 if [ -f "go.mod" ]; then
     go_mod_name=$(gawk -v pattern=$currentGitHostUserPath/ 'NR==1 && match($0, pattern "([^/]+)", arr) { print arr[1] }' go.mod)
@@ -44,6 +29,9 @@ else
     exit 1
 fi
 
+# Show what will be executed
+warning "Running tests, race detection, vet and coverage analysis for $go_mod_name..."
+
 # Initialize results
 test_status="Failed"
 coverage_percent="0"
@@ -51,36 +39,25 @@ race_status="Detected"
 vet_status="Issues"
 
 # Run go vet
-echo "Running go vet..."
-if go vet ./... 2>/dev/null; then
+execute "go vet ./..." "go vet failed in $go_mod_name" "vet passed" "no_exit"
+if [ $? -eq 0 ]; then
     vet_status="OK"
-    info "go vet $go_mod_name ok"
-else
-    add_error "go vet failed in $go_mod_name"
 fi
 
 # Check if test files exist
 if [ -n "$(find . -type f -name "*_test.go")" ]; then
     # Run tests
-    echo "Running tests..."
-    if go test ./... 2>/dev/null; then
+    execute "go test ./..." "Test errors found in $go_mod_name" "tests passed" "no_exit"
+    if [ $? -eq 0 ]; then
         test_status="Passing"
-        info "All tests in $go_mod_name passed"
-    else
-        add_error "Test errors found in $go_mod_name"
     fi
     
     # Run race detection tests
-    echo "Running race detection tests..."
-    if go test -race ./... 2>/dev/null; then
+    execute "go test -race ./..." "Race condition tests failed in $go_mod_name" "race detection passed" "no_exit"
+    if [ $? -eq 0 ]; then
         race_status="Clean"
-        info "Race condition tests in $go_mod_name passed"
-    else
-        add_error "Race condition tests failed in $go_mod_name"
     fi
-    
-    # Calculate coverage
-    echo "Calculating test coverage..."
+      # Calculate coverage
     coverage_output=$(go test -cover ./... 2>/dev/null | grep "coverage:")
     if [ -n "$coverage_output" ]; then
         # Extract coverage percentages, excluding 0.0% (directories without tests)
@@ -98,13 +75,14 @@ if [ -n "$(find . -type f -name "*_test.go")" ]; then
             if [ $count -gt 0 ]; then
                 average=$(awk "BEGIN {printf \"%.0f\", $total / $count}")
                 coverage_percent="$average"
+                addOKmessage "coverage calculated"
             fi
         fi
     else
-        add_error "Failed to calculate coverage in $go_mod_name"
+        addERRORmessage "Failed to calculate coverage in $go_mod_name"
     fi
 else
-    info "No test files found in $go_mod_name"
+    addOKmessage "no test files found in $go_mod_name"
     coverage_percent="0"
 fi
 
@@ -112,16 +90,8 @@ fi
 license_type=$(source license.sh && get_license_type)
 
 # Call gobadge.sh to update README
-echo "Updating badges in README.md..."
-bash gobadge.sh "$go_mod_name" "$test_status" "$coverage_percent" "$race_status" "$vet_status" "$license_type"
+execute "gobadge.sh \"$go_mod_name\" \"$test_status\" \"$coverage_percent\" \"$race_status\" \"$vet_status\" \"$license_type\"" "Failed to update badges" "badges updated" "no_exit"
 
-# Print accumulated error messages if any
-if [ $has_errors -eq 1 ]; then
-    echo ""
-    echo "ERRORS FOUND:"
-    echo -e "$error_messages"
-    exit 1
-fi
-
-echo "All checks completed successfully for $go_mod_name"
+# Print accumulated messages
+successMessages
 exit 0
