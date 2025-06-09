@@ -2,6 +2,7 @@ package devscripts
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -221,14 +222,71 @@ func TestBadgesScript(t *testing.T) {
 		}
 	})
 
-	t.Run("GitHub directory creation", func(t *testing.T) {
-		// This test specifically checks directory creation behavior
+	t.Run("Git directory requirement", func(t *testing.T) {
+		// This test specifically checks that .git directory is required
+		// Save current directory
+		currentDir, _ := os.Getwd()
+
+		// Create a temporary directory without .git
+		tempDir, err := os.MkdirTemp("", "test_no_git")
+		if err != nil {
+			t.Fatalf("Failed to create temp dir: %v", err)
+		}
+		defer os.RemoveAll(tempDir)
+
+		// Change to temp directory
+		err = os.Chdir(tempDir)
+		if err != nil {
+			t.Fatalf("Failed to change to temp directory: %v", err)
+		}
+		defer os.Chdir(currentDir) // Copy necessary scripts to temp directory
+		scriptsToChopy := []string{"badges.sh", "functions.sh", "readmeutils.sh"}
+		for _, script := range scriptsToChopy {
+			sourceFile := filepath.Join(currentDir, script)
+			destFile := filepath.Join(tempDir, script)
+
+			content, err := os.ReadFile(sourceFile)
+			if err != nil {
+				t.Fatalf("Failed to read %s: %v", script, err)
+			}
+
+			err = os.WriteFile(destFile, content, 0755)
+			if err != nil {
+				t.Fatalf("Failed to write %s to temp dir: %v", script, err)
+			}
+		}
+
+		// Create runner in temp directory
+		tempRunner := NewScriptRunner(tempDir)
+
+		// Use a test README file
+		testReadme := "test_git_readme.md"
+		defer os.Remove(testReadme)
+
+		exitCode, output, err := tempRunner.ExecScript("badges.sh", "readmefile:"+testReadme, "test:value:#ffffff")
+
+		if exitCode != 1 {
+			t.Fatalf("Expected exit code 1 when .git directory doesn't exist, got %d. Output: %s", exitCode, output)
+		}
+
+		if err == nil {
+			t.Error("Expected an error when .git directory doesn't exist")
+		}
+
+		// Should show error about git repository not found
+		if !strings.Contains(output, "Git repository not found") {
+			t.Errorf("Expected 'Git repository not found' error, got: %s", output)
+		}
+	})
+
+	t.Run("Git directory exists - badges created", func(t *testing.T) {
+		// This test checks that badges are created when .git directory exists
 		// Always clean up the badges.svg file
-		os.Remove(".github/badges.svg")
-		defer os.Remove(".github/badges.svg")
+		os.Remove(".git/badges.svg")
+		defer os.Remove(".git/badges.svg")
 
 		// Use a test README file to avoid modifying the main README.md
-		testReadme := "test_github_readme.md"
+		testReadme := "test_git_readme.md"
 		os.Remove(testReadme)
 		defer os.Remove(testReadme)
 
@@ -238,20 +296,19 @@ func TestBadgesScript(t *testing.T) {
 			t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
 		}
 
-		// If .github directory didn't exist before, should show creation message
-		// If it already existed, should still work without error
+		// Should show success message
 		if !strings.Contains(output, "Generated badges SVG") {
 			t.Errorf("Expected success message about SVG generation, got: %s", output)
 		}
 
-		// Verify directory exists after execution
-		if _, err := os.Stat(".github"); os.IsNotExist(err) {
-			t.Error("Expected .github directory to exist after script execution")
+		// Verify .git directory exists (should already exist in a git repo)
+		if _, err := os.Stat(".git"); os.IsNotExist(err) {
+			t.Error("Expected .git directory to exist")
 		}
 
-		// Verify badges.svg was created
-		if _, err := os.Stat(".github/badges.svg"); os.IsNotExist(err) {
-			t.Error("Expected .github/badges.svg to be created")
+		// Verify badges.svg was created in .git directory
+		if _, err := os.Stat(".git/badges.svg"); os.IsNotExist(err) {
+			t.Error("Expected .git/badges.svg to be created")
 		}
 	})
 	t.Run("SVG content unchanged - file not modified", func(t *testing.T) {

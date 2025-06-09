@@ -160,31 +160,23 @@ EOF
 update_readme_with_badges() {
     local svg_file="$1"
     
-    # Generate the markdown reference to the SVG
-    local badge_markdown='<img src="'$svg_file'" alt="Project Badges">'
-    
-    # Add dynamic comment after the badge
-    local badge_with_comment="$badge_markdown"$'\n'"<!-- Generated dynamically by badges.sh from github.com/cdvelop/devscripts -->"
+    # Generate the markdown reference to the SVG with link to script
+    local badge_markdown='[![Project Badges]('$svg_file')](https://github.com/cdvelop/devscripts/blob/main/badges.sh)'
     
     # Use section_update from readmeutils.sh to handle README update
     # Place badges after line 1 (after the title)
-    section_update "BADGES_SECTION" "1" "$badge_with_comment" "$CUSTOM_README_FILE" >/dev/null 2>&1
+    section_update "BADGES_SECTION" "1" "$badge_markdown" "$CUSTOM_README_FILE" >/dev/null 2>&1
     return $?
 }
 
-# Function to ensure .github directory exists
-ensure_github_directory() {
-    local github_dir=".github"
-    if [ ! -d "$github_dir" ]; then
-        mkdir -p "$github_dir"
-        if [ $? -eq 0 ]; then
-            info "Created .github directory"
-        else
-            error "Failed to create .github directory"
-            return 1
-        fi
+# Function to ensure .git directory exists and check if it's available
+ensure_git_directory() {
+    local git_dir=".git"
+    if [ ! -d "$git_dir" ]; then
+        error "Git repository not found (.git directory does not exist)"
+        return 1
     fi
-    echo "$github_dir"
+    return 0
 }
 
 # Main function
@@ -217,11 +209,12 @@ main() {
         exit 1
     fi
     
-    # Ensure .github directory exists
-    local github_dir=$(ensure_github_directory)
+    # Ensure .git directory exists
+    ensure_git_directory
     if [ $? -ne 0 ]; then
         exit 1
     fi
+    local git_dir=".git"
     
     # Determine output file
     local svg_file
@@ -234,8 +227,8 @@ main() {
             mkdir -p "$custom_dir"
         fi
     else
-        # Default to .github/badges.svg
-        svg_file="$github_dir/badges.svg"
+        # Default to .git/badges.svg
+        svg_file="$git_dir/badges.svg"
     fi
     
     # Generate SVG content to a temporary variable using only badge parameters
