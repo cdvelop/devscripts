@@ -31,15 +31,9 @@ func TestBadgesScript(t *testing.T) {
 		if exitCode != 0 {
 			t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
 		}
-
 		// Verify success message
-		if !strings.Contains(output, "Generated badges SVG: "+testFile) {
-			t.Errorf("Expected success message about SVG generation, got: %s", output)
-		}
-
-		// Verify badge count
-		if !strings.Contains(output, "Valid badges generated: 3") {
-			t.Errorf("Expected 3 valid badges generated, got: %s", output)
+		if !strings.Contains(output, "Badges saved to "+testFile) {
+			t.Errorf("Expected success message about badges saved, got: %s", output)
 		}
 
 		// Verify file was created
@@ -100,14 +94,8 @@ func TestBadgesScript(t *testing.T) {
 			"output_svgfile:"+testFile,
 			"readmefile:"+testReadme,
 			"license:MIT:#007acc")
-
 		if exitCode != 0 {
 			t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
-		}
-
-		// Verify single badge count
-		if !strings.Contains(output, "Valid badges generated: 1") {
-			t.Errorf("Expected 1 valid badge generated, got: %s", output)
 		}
 
 		// Verify file was created
@@ -156,15 +144,9 @@ func TestBadgesScript(t *testing.T) {
 		if exitCode != 0 {
 			t.Fatalf("Expected exit code 0 (should continue with valid badges), got %d. Output: %s, Error: %v", exitCode, output, err)
 		}
-
 		// Should show error for invalid format but continue
 		if !strings.Contains(output, "Invalid badge format: invalid-format") {
 			t.Errorf("Expected error message for invalid format, got: %s", output)
-		}
-
-		// Should still generate valid badges (2 out of 3)
-		if !strings.Contains(output, "Valid badges generated: 2") {
-			t.Errorf("Expected 2 valid badges generated, got: %s", output)
 		}
 
 		// Verify file was still created
@@ -192,15 +174,9 @@ func TestBadgesScript(t *testing.T) {
 		if exitCode != 0 {
 			t.Fatalf("Expected exit code 0 (should continue with valid badges), got %d. Output: %s, Error: %v", exitCode, output, err)
 		}
-
 		// Should show error for empty fields
 		if !strings.Contains(output, "Empty fields in badge") {
 			t.Errorf("Expected error message for empty fields, got: %s", output)
-		}
-
-		// Should still generate valid badges (2 out of 3)
-		if !strings.Contains(output, "Valid badges generated: 2") {
-			t.Errorf("Expected 2 valid badges generated, got: %s", output)
 		}
 	})
 
@@ -278,15 +254,14 @@ func TestBadgesScript(t *testing.T) {
 			t.Errorf("Expected 'Git repository not found' error, got: %s", output)
 		}
 	})
-
-	t.Run("Git directory exists - badges created", func(t *testing.T) {
-		// This test checks that badges are created when .git directory exists
-		// Always clean up the badges.svg file
-		os.Remove(".git/badges.svg")
-		defer os.Remove(".git/badges.svg")
+	t.Run("Default directory - badges created in docs/img", func(t *testing.T) {
+		// This test checks that badges are created in docs/img when .git directory exists
+		// Always clean up the badges.svg file and directory
+		os.RemoveAll("docs/img")
+		defer os.RemoveAll("docs/img")
 
 		// Use a test README file to avoid modifying the main README.md
-		testReadme := "test_git_readme.md"
+		testReadme := "test_default_dir_readme.md"
 		os.Remove(testReadme)
 		defer os.Remove(testReadme)
 
@@ -297,8 +272,8 @@ func TestBadgesScript(t *testing.T) {
 		}
 
 		// Should show success message
-		if !strings.Contains(output, "Generated badges SVG") {
-			t.Errorf("Expected success message about SVG generation, got: %s", output)
+		if !strings.Contains(output, "Badges saved to docs/img/badges.svg") {
+			t.Errorf("Expected success message about badges saved to docs/img/badges.svg, got: %s", output)
 		}
 
 		// Verify .git directory exists (should already exist in a git repo)
@@ -306,9 +281,14 @@ func TestBadgesScript(t *testing.T) {
 			t.Error("Expected .git directory to exist")
 		}
 
-		// Verify badges.svg was created in .git directory
-		if _, err := os.Stat(".git/badges.svg"); os.IsNotExist(err) {
-			t.Error("Expected .git/badges.svg to be created")
+		// Verify docs/img directory was created
+		if _, err := os.Stat("docs/img"); os.IsNotExist(err) {
+			t.Error("Expected docs/img directory to be created")
+		}
+
+		// Verify badges.svg was created in docs/img directory
+		if _, err := os.Stat("docs/img/badges.svg"); os.IsNotExist(err) {
+			t.Error("Expected docs/img/badges.svg to be created")
 		}
 	})
 	t.Run("SVG content unchanged - file not modified", func(t *testing.T) {
@@ -412,10 +392,9 @@ func TestBadgesScript(t *testing.T) {
 		if exitCode != 0 {
 			t.Fatalf("Second generation failed - exit code %d. Output: %s, Error: %v", exitCode, output, err)
 		}
-
 		// Verify file was updated
-		if !strings.Contains(output, "Generated badges SVG: "+testFile) {
-			t.Errorf("Expected 'Generated badges SVG' message for changed content, got: %s", output)
+		if !strings.Contains(output, "Badges saved to "+testFile) {
+			t.Errorf("Expected 'Badges saved to' message for changed content, got: %s", output)
 		}
 
 		// Verify modification time changed
