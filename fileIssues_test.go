@@ -138,7 +138,7 @@ execute() {
 	scriptContent := `#!/bin/bash
 source "$(dirname "$0")/functions.sh"
 source "$(dirname "$0")/fileIssues.sh"
-create_doing_md_file
+create_issue_md_file
 cat issues.md
 `
 	err = os.WriteFile(testScript, []byte(scriptContent), 0755)
