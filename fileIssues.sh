@@ -43,7 +43,7 @@ function get_commit_message_from_issue_md() {
 }
 
 # Create issues.md file with initial template
-create_doing_md_file() {
+create_issue_md_file() {
     local content="[x] init code\n[ ] task 1"
     execute "echo -e \"$content\" > issues.md" \
         "Failed to create issues.md" \
