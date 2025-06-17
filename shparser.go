@@ -112,18 +112,22 @@ func (sp *ScriptParser) ParseScripts() ([]ScriptInfo, error) {
 }
 
 func (sp *ScriptParser) generateAutoDescription(name, content string) string {
-	keywords := map[string]string{
-		"git":    "Git operations",
-		"repo":   "Repository management",
-		"setup":  "System setup/config",
-		"update": "Dependency updates",
-		"go":     "Go language utilities",
+	// Use ordered slice to ensure deterministic results
+	keywords := []struct {
+		key   string
+		value string
+	}{
+		{"git", "Git operations"},
+		{"repo", "Repository management"},
+		{"setup", "System setup/config"},
+		{"update", "Dependency updates"},
+		{"go", "Go language utilities"},
 	}
 
 	var desc []string
-	for k, v := range keywords {
-		if strings.Contains(strings.ToLower(name), k) {
-			desc = append(desc, v)
+	for _, kv := range keywords {
+		if strings.Contains(strings.ToLower(name), kv.key) {
+			desc = append(desc, kv.value)
 		}
 	}
 
