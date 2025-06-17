@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestReadmeUtilsCreateNewReadme(t *testing.T) {
+func TestSectionUpdateCreateNewReadme(t *testing.T) {
 	runner := NewScriptRunner()
 
 	// Clean up any existing test files
@@ -15,9 +15,8 @@ func TestReadmeUtilsCreateNewReadme(t *testing.T) {
 	// Test content for badges section
 	badgeContent := `<div align="center">
 <img src="https://img.shields.io/badge/Go-1.22-blue" alt="Go version">
-</div>`
-	// Test creating new README with badges section using section_update
-	exitCode, output, err := runner.ExecScript("readmeutils.sh", "section_update", "BADGES_SECTION", "", badgeContent, "test_README.md")
+</div>` // Test creating new README with badges section using sectionUpdate
+	exitCode, output, err := runner.ExecScript("sectionUpdate.sh", "BADGES_SECTION", "", badgeContent, "test_README.md")
 
 	if exitCode != 0 {
 		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
@@ -50,7 +49,7 @@ func TestReadmeUtilsCreateNewReadme(t *testing.T) {
 	}
 }
 
-func TestReadmeUtilsUpdateExistingSection(t *testing.T) {
+func TestSectionUpdateUpdateExistingSection(t *testing.T) {
 	runner := NewScriptRunner()
 
 	// Clean up any existing test files
@@ -77,9 +76,8 @@ Some other content here.
 <img src="https://img.shields.io/badge/Go-1.22-blue" alt="Go version">
 <img src="https://img.shields.io/badge/Tests-Passing-green" alt="Tests">
 </div>`
-
 	// Test updating existing section
-	exitCode, output, err := runner.ExecScript("readmeutils.sh", "section_update", "BADGES_SECTION", "", newBadgeContent, "test_README.md")
+	exitCode, output, err := runner.ExecScript("sectionUpdate.sh", "BADGES_SECTION", "", newBadgeContent, "test_README.md")
 
 	if exitCode != 0 {
 		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
@@ -117,7 +115,7 @@ Some other content here.
 	}
 }
 
-func TestReadmeUtilsNoChangeWhenSame(t *testing.T) {
+func TestSectionUpdateNoChangeWhenSame(t *testing.T) {
 	runner := NewScriptRunner()
 
 	// Clean up any existing test files
@@ -146,9 +144,8 @@ Some content.
 	if err != nil {
 		t.Fatalf("Failed to get file info before: %v", err)
 	}
-
 	// Test with same content - should not change
-	exitCode, output, err := runner.ExecScript("readmeutils.sh", "section_update", "BADGES_SECTION", "", badgeContent, "test_README.md")
+	exitCode, output, err := runner.ExecScript("sectionUpdate.sh", "BADGES_SECTION", "", badgeContent, "test_README.md")
 
 	if exitCode != 0 {
 		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
@@ -169,7 +166,7 @@ Some content.
 	}
 }
 
-func TestReadmeUtilsPositionAfterLine(t *testing.T) {
+func TestSectionUpdatePositionAfterLine(t *testing.T) {
 	runner := NewScriptRunner()
 
 	// Clean up any existing test files
@@ -190,9 +187,8 @@ Content here.
 	}
 
 	// Test badge content
-	badgeContent := `<img src=".github/badges.svg" alt="Project Badges">`
-	// Test creating badges after line 1 (after title)
-	exitCode, output, err := runner.ExecScript("readmeutils.sh", "section_update", "BADGES_SECTION", "1", badgeContent, "test_README.md")
+	badgeContent := `<img src=".github/badges.svg" alt="Project Badges">` // Test creating badges after line 1 (after title)
+	exitCode, output, err := runner.ExecScript("sectionUpdate.sh", "BADGES_SECTION", "1", badgeContent, "test_README.md")
 
 	if exitCode != 0 {
 		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
@@ -227,7 +223,7 @@ Content here.
 	}
 }
 
-func TestReadmeUtilsMoveSectionToNewPosition(t *testing.T) {
+func TestSectionUpdateMoveSectionToNewPosition(t *testing.T) {
 	runner := NewScriptRunner()
 
 	// Clean up any existing test files
@@ -253,9 +249,8 @@ Content here.
 
 	// New badge content
 	newBadgeContent := `<img src=".github/badges.svg" alt="Project Badges">`
-
 	// Test moving badges to after line 1 (after title)
-	exitCode, output, err := runner.ExecScript("readmeutils.sh", "section_update", "BADGES_SECTION", "1", newBadgeContent, "test_README.md")
+	exitCode, output, err := runner.ExecScript("sectionUpdate.sh", "BADGES_SECTION", "1", newBadgeContent, "test_README.md")
 
 	if exitCode != 0 {
 		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
@@ -295,5 +290,157 @@ Content here.
 	lastLines := strings.Join(lines[len(lines)-5:], "\n")
 	if strings.Contains(lastLines, "BADGES_SECTION") {
 		t.Errorf("Badges section should not be at the end anymore")
+	}
+}
+
+func TestSectionUpdateNoDuplicateSections(t *testing.T) {
+	runner := NewScriptRunner()
+
+	// Clean up any existing test files
+	os.Remove("test_duplicate_README.md")
+	defer os.Remove("test_duplicate_README.md")
+
+	// Create README with duplicate badges sections (simulating the race condition)
+	readmeWithDuplicates := `# Test Project
+
+<!-- START_SECTION:BADGES_SECTION -->
+<a href="docs/img/badges.svg"><img src="docs/img/badges.svg" alt="Project Badges" title="Generated by badges.sh from github.com/cdvelop/devscripts"></a>
+<!-- END_SECTION:BADGES_SECTION -->
+<!-- START_SECTION:BADGES_SECTION -->
+<a href="docs/img/badges.svg"><img src="docs/img/badges.svg" alt="Project Badges" title="Generated by badges.sh from github.com/cdvelop/devscripts"></a>
+<!-- END_SECTION:BADGES_SECTION -->
+
+This is a test project with duplicate sections.
+`
+	err := os.WriteFile("test_duplicate_README.md", []byte(readmeWithDuplicates), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test README with duplicates: %v", err)
+	}
+
+	// New badge content
+	newBadgeContent := `<a href="docs/img/badges.svg"><img src="docs/img/badges.svg" alt="Updated Project Badges" title="Generated by badges.sh from github.com/cdvelop/devscripts"></a>` // Test updating section when duplicates exist - should remove all duplicates and create only one
+	exitCode, output, err := runner.ExecScript("sectionUpdate.sh", "BADGES_SECTION", "1", newBadgeContent, "test_duplicate_README.md")
+
+	if exitCode != 0 {
+		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
+	} // Verify README was updated
+	content, err := os.ReadFile("test_duplicate_README.md")
+	if err != nil {
+		t.Fatalf("Failed to read updated README: %v", err)
+	}
+
+	contentStr := string(content)
+
+	// Count occurrences of BADGES_SECTION
+	startSectionCount := strings.Count(contentStr, "START_SECTION:BADGES_SECTION")
+	endSectionCount := strings.Count(contentStr, "END_SECTION:BADGES_SECTION")
+
+	// Should have exactly one start and one end section
+	if startSectionCount != 1 {
+		t.Errorf("Expected exactly 1 START_SECTION:BADGES_SECTION, found %d", startSectionCount)
+	}
+
+	if endSectionCount != 1 {
+		t.Errorf("Expected exactly 1 END_SECTION:BADGES_SECTION, found %d", endSectionCount)
+	}
+
+	// Should contain the updated content
+	if !strings.Contains(contentStr, "Updated Project Badges") {
+		t.Errorf("Should contain updated badge content")
+	}
+
+	// Should preserve other content
+	if !strings.Contains(contentStr, "This is a test project with duplicate sections") {
+		t.Errorf("Other content should be preserved")
+	}
+
+	// Verify section is positioned correctly (after line 1)
+	lines := strings.Split(contentStr, "\n")
+	if len(lines) < 3 {
+		t.Fatalf("README should have at least 3 lines, got %d", len(lines))
+	}
+
+	if !strings.Contains(lines[1], "START_SECTION:BADGES_SECTION") {
+		t.Errorf("Badges section should start at line 2, but found: %s", lines[1])
+	}
+}
+
+func TestSectionUpdateDetectMultipleSectionsWithDifferentContent(t *testing.T) {
+	runner := NewScriptRunner()
+
+	// Clean up any existing test files
+	os.Remove("test_multiple_sections_README.md")
+	defer os.Remove("test_multiple_sections_README.md")
+
+	// Create README with multiple sections but different content
+	readmeWithMultipleSections := `# Test Project
+
+<!-- START_SECTION:BADGES_SECTION -->
+<a href="old-badges.svg"><img src="old-badges.svg" alt="Old Badges"></a>
+<!-- END_SECTION:BADGES_SECTION -->
+
+Some content here.
+
+<!-- START_SECTION:BADGES_SECTION -->
+<a href="other-badges.svg"><img src="other-badges.svg" alt="Other Badges"></a>
+<!-- END_SECTION:BADGES_SECTION -->
+
+More content.
+`
+	err := os.WriteFile("test_multiple_sections_README.md", []byte(readmeWithMultipleSections), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create test README with multiple sections: %v", err)
+	}
+
+	// New badge content
+	newBadgeContent := `<a href="docs/img/badges.svg"><img src="docs/img/badges.svg" alt="Consolidated Badges"></a>`
+	// Test updating section - should consolidate all duplicate sections into one
+	exitCode, output, err := runner.ExecScript("sectionUpdate.sh", "BADGES_SECTION", "1", newBadgeContent, "test_multiple_sections_README.md")
+
+	if exitCode != 0 {
+		t.Fatalf("Expected exit code 0, got %d. Output: %s, Error: %v", exitCode, output, err)
+	}
+
+	// Verify README was updated
+	content, err := os.ReadFile("test_multiple_sections_README.md")
+	if err != nil {
+		t.Fatalf("Failed to read updated README: %v", err)
+	}
+
+	contentStr := string(content)
+
+	// Count occurrences of BADGES_SECTION
+	startSectionCount := strings.Count(contentStr, "START_SECTION:BADGES_SECTION")
+	endSectionCount := strings.Count(contentStr, "END_SECTION:BADGES_SECTION")
+
+	// Should have exactly one start and one end section
+	if startSectionCount != 1 {
+		t.Errorf("Expected exactly 1 START_SECTION:BADGES_SECTION, found %d", startSectionCount)
+	}
+
+	if endSectionCount != 1 {
+		t.Errorf("Expected exactly 1 END_SECTION:BADGES_SECTION, found %d", endSectionCount)
+	}
+
+	// Should contain only the new content, not the old ones
+	if !strings.Contains(contentStr, "Consolidated Badges") {
+		t.Errorf("Should contain new consolidated badge content")
+	}
+
+	if strings.Contains(contentStr, "old-badges.svg") {
+		t.Errorf("Should not contain old badge content")
+	}
+
+	if strings.Contains(contentStr, "other-badges.svg") {
+		t.Errorf("Should not contain other old badge content")
+	}
+
+	// Should preserve non-section content
+	if !strings.Contains(contentStr, "Some content here") {
+		t.Errorf("Should preserve content between sections")
+	}
+
+	if !strings.Contains(contentStr, "More content") {
+		t.Errorf("Should preserve content after sections")
 	}
 }

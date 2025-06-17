@@ -5,7 +5,7 @@
 # Custom readme: badges.sh "readmefile:custom_readme.md" "license:MIT:#007acc"
 
 source functions.sh
-source readmeutils.sh
+# source readmeutils.sh  # Replaced with direct mdutils.sh call
 
 # Constants
 SVG_HEIGHT=20
@@ -165,10 +165,11 @@ update_readme_with_badges() {
     # Generate HTML image with link to SVG and title with generator info
     local badge_markdown='<a href="'$svg_file'"><img src="'$svg_file'" alt="Project Badges" title="'$BADGES_INFO'"></a>'
     
-    # Use section_update from readmeutils.sh to handle README update
+    # Use sectionUpdate.sh to handle README update
     # Place badges after line 1 (after the title)
-    section_update "BADGES_SECTION" "1" "$badge_markdown" "$CUSTOM_README_FILE" >/dev/null 2>&1
-    return $?
+    ./sectionUpdate.sh "BADGES_SECTION" "1" "$badge_markdown" "$CUSTOM_README_FILE" >/dev/null 2>&1
+    local exit_code=$?
+    return $exit_code
 }
 
 # Function to ensure .git directory exists and check if it's available

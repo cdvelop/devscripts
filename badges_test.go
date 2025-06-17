@@ -209,14 +209,13 @@ func TestBadgesScript(t *testing.T) {
 			t.Fatalf("Failed to create temp dir: %v", err)
 		}
 		defer os.RemoveAll(tempDir)
-
 		// Change to temp directory
 		err = os.Chdir(tempDir)
 		if err != nil {
 			t.Fatalf("Failed to change to temp directory: %v", err)
 		}
 		defer os.Chdir(currentDir) // Copy necessary scripts to temp directory
-		scriptsToChopy := []string{"badges.sh", "functions.sh", "readmeutils.sh"}
+		scriptsToChopy := []string{"badges.sh", "functions.sh", "sectionUpdate.sh"}
 		for _, script := range scriptsToChopy {
 			sourceFile := filepath.Join(currentDir, script)
 			destFile := filepath.Join(tempDir, script)
