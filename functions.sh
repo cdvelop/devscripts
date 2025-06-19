@@ -14,22 +14,22 @@ username=$(whoami)
 
 # Function to display a success message
 success() {
-  echo -e "\033[0;32m$1\033[0m" # green color
+  echo -e "\033[0;32m$1\033[0m" >&2 # green color
 }
 
 # Function to display a warning message
 warning() {
-  echo -e "\033[0;33m$1\033[0m" # yellow color
+  echo -e "\033[0;33m$1\033[0m" >&2 # yellow color
 }
 
 # Function to display an error message
 error() {
-  echo -e "\033[0;31mError: $1 $2\033[0m" # red color
+  echo -e "\033[0;31mError: $1 $2\033[0m" >&2 # red color
 }
 
 # Function to display an info message
 info() {
-  echo -e "\033[0;36m$1\033[0m" # cyan color
+  echo -e "\033[0;36m$1\033[0m" >&2 # cyan color
 }
 
 # Function to perform an action and show error message on failure
