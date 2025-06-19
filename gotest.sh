@@ -90,8 +90,9 @@ fi
 license_type=$(source license.sh && get_license_type)
 
 # Call gobadge.sh to update README
-execute "gobadge.sh \"$go_mod_name\" \"$test_status\" \"$coverage_percent\" \"$race_status\" \"$vet_status\" \"$license_type\"" "Failed to update badges" "badges updated" "no_exit"
+gobadge.sh "$go_mod_name" "$test_status" "$coverage_percent" "$race_status" "$vet_status" "$license_type"
+badge_exit_code=$?
 
 # Print accumulated messages
 successMessages
-exit 0
+exit $badge_exit_code

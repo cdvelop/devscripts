@@ -167,7 +167,7 @@ update_readme_with_badges() {
     
     # Use sectionUpdate.sh to handle README update
     # Place badges after line 1 (after the title)
-    ./sectionUpdate.sh "BADGES_SECTION" "1" "$badge_markdown" "$CUSTOM_README_FILE" >/dev/null 2>&1
+    sectionUpdate.sh "BADGES_SECTION" "1" "$badge_markdown" "$CUSTOM_README_FILE" >/dev/null 2>&1
     local exit_code=$?
     return $exit_code
 }
