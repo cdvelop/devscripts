@@ -10,7 +10,7 @@ scripts commonly used by a developer in his daily workflow
 
 | Script Name            | Description                                                                                                           | Usage                          |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| `backupwindows.sh`     | Performs backup operations using FreeFileSync on Windows systems                                                      | `./backupwindows.sh`           |
+| `autoBackup.sh`     | Performs backup operations using FreeFileSync on Windows systems                                                      | `./autoBackup.sh`           |
 | `badges.sh`            | Generate SVG badges for GitHub projects and update README                                                             | `Example: badges.sh "license:MIT:#007acc" "go:1.22:#00add8" "coverage:85%:#28a745"` |
 | `changeremote.sh`      | Script to change the remote URL of a Git repository                                                                   | `./changeremote.sh https://github.com/username/repository.git` |
 | `delete.sh`            | Script to delete a file locally and track the deletion in Git                                                         | `./delete.sh filename.txt`     |

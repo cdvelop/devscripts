@@ -54,7 +54,7 @@ if [ $? -eq 0 ]; then # Verificar si es 0
   
     bash gomodtagupdate.sh "$go_mod_name" "$latest_tag"
     if [ $? -eq 0 ]; then # si es 0 realizamos backup
-      source backupwindows.sh
+      source autoBackup.sh
     fi
     
   fi
