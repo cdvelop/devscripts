@@ -11,7 +11,7 @@ func TestRunScript(t *testing.T) {
 	runnerForTests := NewScriptRunner()
 
 	t.Run("Successful script execution", func(t *testing.T) {
-		exitCode, output, err := runnerForTests.ExecScript("testscript.sh", "arg1", "arg2")
+		exitCode, output, err := runnerForTests.ExecScript("testScript.sh", "arg1", "arg2")
 
 		if exitCode != 0 {
 			t.Fatalf("Expected exit code 0, got %d", exitCode)
@@ -39,7 +39,7 @@ func TestRunScript(t *testing.T) {
 	})
 
 	t.Run("Script with error", func(t *testing.T) {
-		exitCode, output, err := runnerForTests.ExecScript("testscript.sh", "error")
+		exitCode, output, err := runnerForTests.ExecScript("testScript.sh", "error")
 
 		if exitCode != 1 {
 			t.Fatalf("Expected exit code 1, got %d", exitCode)
@@ -76,7 +76,7 @@ func TestRunScript(t *testing.T) {
 	})
 
 	t.Run("Custom scriptRunner", func(t *testing.T) {
-		exitCode, output, err := runnerForTests.ExecScript("testscript.sh", "custom")
+		exitCode, output, err := runnerForTests.ExecScript("testScript.sh", "custom")
 
 		if exitCode != 0 {
 			t.Fatalf("Expected exit code 0, got %d", exitCode)
