@@ -5,6 +5,13 @@
 # Import common functions
 source functions.sh
 
+# Ensure Go is in PATH
+if ! command -v go >/dev/null 2>&1; then
+    if [ -d "/usr/local/go/bin" ]; then
+        export PATH="/usr/local/go/bin:$PATH"
+    fi
+fi
+
 init_go_module() {
     local current_folder=$1
     local git_remote=$2
@@ -14,8 +21,19 @@ init_go_module() {
         return 1
     fi
 
+    # Find Go executable
+    local go_cmd
+    if command -v go >/dev/null 2>&1; then
+        go_cmd="go"
+    elif [ -f "/usr/local/go/bin/go" ]; then
+        go_cmd="/usr/local/go/bin/go"
+    else
+        error "Go is not installed or not found in PATH"
+        return 1
+    fi
+
     if [ ! -f "go.mod" ]; then
-        execute "go mod init $git_remote/$current_folder" \
+        execute "$go_cmd mod init $git_remote/$current_folder" \
             "Failed to initialize go mod" \
             "Go module initialized successfully" || return $?
     fi
