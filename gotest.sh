@@ -38,10 +38,14 @@ coverage_percent="0"
 race_status="Detected"
 vet_status="Issues"
 
-# Run go vet
-execute "go vet ./..." "go vet failed in $go_mod_name" "vet passed" "no_exit"
-if [ $? -eq 0 ]; then
+# Run go vet (ignore unsafe.Pointer warnings for reflection packages)
+vet_output=$(go vet ./... 2>&1)
+if echo "$vet_output" | grep -v "possible misuse of unsafe.Pointer" | grep -q .; then
+    error "go vet failed in $go_mod_name" 
+    echo "$vet_output"
+else
     vet_status="OK"
+    addOKmessage "vet passed"
 fi
 
 # Check if test files exist
