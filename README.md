@@ -142,3 +142,6 @@ By default, the following script types are supported:
 - Python scripts (.py) - executed with python
 
 On Windows, Git Bash is used for executing shell scripts.
+
+---
+## [Contributing](docs/CONTRIBUTING.md)
