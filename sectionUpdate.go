@@ -231,7 +231,19 @@ func fileExists(filename string) bool {
 	return !os.IsNotExist(err)
 }
 
-// MdUtils is the main function that follows the established pattern
+// SectionUpdate is a small CLI-style entry that builds an `MdHandler` from
+// the provided variadic string arguments and runs its `SectionUpdate` method.
+//
+// Args order: sectionID (required), afterLine (optional), content (required),
+// readmeFile (optional, default: `README.md`).
+//
+// Side effects: reads/writes the target file and prints status messages.
+// On error it prints the error and exits the process with code 1. For
+// programmatic use prefer calling `MdHandler.SectionUpdate()` directly.
+//
+// Example:
+//
+//	SectionUpdate("TOOLS", "1", "- toolA\n- toolB", "README.md")
 func SectionUpdate(args ...string) {
 	handler := NewMdHandler(args...)
 	err := handler.SectionUpdate()

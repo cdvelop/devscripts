@@ -47,7 +47,7 @@ func ExecuteWithArgs(fn func(...string)) {
 }
 ```
 
-### 3. Business Function (Root)
+### 3. Business Function (Root) EXAMPLE
 ```go
 package devscripts
 
