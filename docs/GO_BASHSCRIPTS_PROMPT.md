@@ -1,0 +1,4 @@
+## PROMPT GO_BASH_SCRIPTS
+en este repositorio devscripts/(modulo go) tengo varios scripts bash/go que he ido cambiando a este sistema #file:GO_BASH_SCRIPTS.md ya que me permite de una forma sencilla ir cambiando bash a go con los beneficios que este lenguaje tiene como testing/tipado estático/librerías.. ahora me he visto en la necesidad de reutilizar la lógica de #file:badges.sh para hacerlo un paquete totalmente autónomo para luego crear su propio repositorio y así reutilizarlo tanto en devscripts como donde se requiera. actualmente tiene los test en #file:badges_test.go estos son es resguardo para comprobar el traspaso de la lógica a go. para crear este paquete crea el directorio badge en la raíz de este repositorio y añade los archivos necesarios.
+
+si tienes dudas de la implementation realízame todas estas antes, con sugerencias, alternativas pro/contras y elabora un plan en docs/ISSUE_BADGES_TO_GO.md para asi poder revisarlo y aprobarlo antes de comenzar 

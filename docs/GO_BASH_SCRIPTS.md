@@ -105,6 +105,7 @@ source "$(dirname "$0")/gocurrentdir.sh"
 - No hardcoded references
 - Consistent pattern across all scripts
 - Windows compatibility by gitbash
+- Testing support with go test
 
 ## LLM Instructions
 
