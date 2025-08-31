@@ -7,8 +7,9 @@ source issue.sh # Incluir script para manejar issues de GitHub
 
 current_folder=$(basename "$(pwd)")
 
-# Concatena los parámetros en una sola cadena
-commit_message="$*"
+# Accept positional args: first is commit message (quoted), second optional is tag
+commit_message="$1"
+provided_tag="$2"
 
 # Analiza el mensaje para detectar comandos de issues ANTES de modificarlo
 parse_issue_command "$commit_message"
@@ -31,29 +32,34 @@ else
     execute "git commit -m '$commit_message'" "Error al crear el nuevo commit $current_folder."
 fi
 
-# Obtén la última etiqueta
-latest_tag=$(git describe --abbrev=0 --tags 2>/dev/null)
-
-if [ -z "$latest_tag" ]; then
-    # Si no existe ninguna etiqueta, establece la etiqueta inicial en v0.0.1
-    new_tag="v0.0.1"
+# Si se pasó una etiqueta por parámetro, usarla y saltarse la lógica automática
+if [ -n "$provided_tag" ]; then
+    new_tag="$provided_tag"
 else
-    # Extrae el número de la etiqueta
-    last_number=$(echo "$latest_tag" | grep -oE '[0-9]+$')
+    # Obtén la última etiqueta
+    latest_tag=$(git describe --abbrev=0 --tags 2>/dev/null)
 
-    # Incrementa el número en uno
-    next_number=$((last_number + 1))
+    if [ -z "$latest_tag" ]; then
+        # Si no existe ninguna etiqueta, establece la etiqueta inicial en v0.0.1
+        new_tag="v0.0.1"
+    else
+        # Extrae el número de la etiqueta
+        last_number=$(echo "$latest_tag" | grep -oE '[0-9]+$')
 
-    # Construye la nueva etiqueta
-    new_tag=$(echo "$latest_tag" | sed "s/$last_number$/$next_number/")
-    
-    # Verifica si la etiqueta ya existe
-    while git rev-parse "$new_tag" >/dev/null 2>&1; do
-        # Si la etiqueta existe, incrementar el número nuevamente
-        next_number=$((next_number + 1))
+        # Incrementa el número en uno
+        next_number=$((last_number + 1))
+
+        # Construye la nueva etiqueta
         new_tag=$(echo "$latest_tag" | sed "s/$last_number$/$next_number/")
-        echo "La etiqueta ya existe, probando con $new_tag"
-    done
+        
+        # Verifica si la etiqueta ya existe
+        while git rev-parse "$new_tag" >/dev/null 2>&1; do
+            # Si la etiqueta existe, incrementar el número nuevamente
+            next_number=$((next_number + 1))
+            new_tag=$(echo "$latest_tag" | sed "s/$last_number$/$next_number/")
+            echo "La etiqueta ya existe, probando con $new_tag"
+        done
+    fi
 fi
 
 execute "git tag $new_tag" "Error al crear la nueva etiqueta $current_folder." "nueva etiqueta $new_tag"

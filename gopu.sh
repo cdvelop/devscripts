@@ -1,6 +1,6 @@
 #!/bin/bash
 # Description: Automated workflow for Go projects: checks modules, updates dependencies, creates tags, backs up and pushes to remote
-# Usage: gopu.sh "Commit message"
+# Usage: gopu.sh "Commit message" [tag]
 
 # Function to show usage instructions
 show_usage() {
@@ -18,7 +18,7 @@ show_usage() {
     echo "    6. Creates and pushes a tag"
     echo ""
     echo "USAGE:"
-    echo "    gopu.sh \"Your detailed commit message here\""
+    echo "    gopu.sh \"Your detailed commit message here\" [optional-tag]"
     echo ""
     echo "EXAMPLES:"
     echo "    gopu.sh \"feat: implement user authentication module\""
@@ -32,18 +32,24 @@ show_usage() {
 source functions.sh
 
 # Check if commit message is provided
-if [ $# -eq 0 ] || [ -z "$*" ]; then
-    show_usage
-    exit 1
+if [ $# -lt 1 ] || [ -z "$1" ]; then
+  show_usage
+  exit 1
 fi
 
-# Concatena los parámetros en una sola cadena
-commit_message="$*"
+# First positional arg is the commit message, second optional is tag
+commit_message="$1"
+provided_tag="$2"
 
 bash gomodcheck.sh
 if [ $? -eq 0 ]; then # Verificar si es 0
 
-  bash pu.sh "$commit_message"
+  # Pass commit message and optional tag through to pu.sh
+  if [ -n "$provided_tag" ]; then
+    bash pu.sh "$commit_message" "$provided_tag"
+  else
+    bash pu.sh "$commit_message"
+  fi
   if [ $? -eq 0 ]; then # Verificar el código de salida
 
     # actualizar los otros módulos donde este paquete es utilizado
