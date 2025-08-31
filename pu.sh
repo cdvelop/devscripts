@@ -22,7 +22,7 @@ if [ -z "$commit_message" ]; then
     commit_message="auto update package"
 fi
 
-# Agrega cambios al índice
+# Agrega cambios al índice.
 execute "git add ." "Error al añadir cambios a Git $current_folder." "cambios $current_folder añadidos"
 
 # Realiza el commit solo si hay cambios
