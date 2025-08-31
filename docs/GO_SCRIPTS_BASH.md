@@ -104,6 +104,7 @@ source "$(dirname "$0")/gocurrentdir.sh"
 - Automatic script name detection
 - No hardcoded references
 - Consistent pattern across all scripts
+- Windows compatibility by gitbash
 
 ## LLM Instructions
 
