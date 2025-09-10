@@ -36,5 +36,8 @@ update_single_go_module() {
     local new_version=$2
     execute "go get $currentGitHostUserPath/$module_name@$new_version" \
         "failed to update package $module_name" || return 1
-    execute "go get -u all" "failed to update packages" || return 1
+    # Avoid running `go get -u all` here because it upgrades all dependencies
+    # and can introduce unrelated changes or failures. The caller (`gomodtagupdate.sh`)
+    # runs `update_and_verify_go_module` which executes `go mod tidy` and verifies tests.
+    # If you need to force-upgrade transitive dependencies, do it explicitly outside this function.
 }
