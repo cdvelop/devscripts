@@ -3,7 +3,7 @@ module github.com/cdvelop/devscripts
 go 1.25.2
 
 require (
-	github.com/cdvelop/badges v0.0.3
+	github.com/cdvelop/badges v0.0.4
 	github.com/cdvelop/gotest v0.0.1
 	github.com/cdvelop/mdgo v0.0.9
 )
