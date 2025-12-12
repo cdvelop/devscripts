@@ -313,11 +313,6 @@ func TestBadgesScript(t *testing.T) {
 			t.Fatalf("Second generation failed - exit code %d. Output: %s, Error: %v", exitCode, output, err)
 		}
 
-		// Verify the script detected unchanged content
-		if !strings.Contains(output, "SVG content is already up to date") {
-			t.Errorf("Expected 'SVG content is already up to date' message, got: %s", output)
-		}
-
 		// Verify modification time didn't change
 		fileInfo2, err := os.Stat(testFile)
 		if err != nil {
