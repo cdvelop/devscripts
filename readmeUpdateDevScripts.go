@@ -3,6 +3,8 @@ package devscripts
 import (
 	"os"
 	"strings"
+
+	"github.com/cdvelop/mdgo"
 )
 
 // DevScriptsReadmeUpdater handles updating README.md with scripts documentation
@@ -42,9 +44,15 @@ func (dru *DevScriptsReadmeUpdater) UpdateReadme(readmePath string) error {
 		return err
 	}
 
-	// Use sectionUpdate to handle the file update
-	handler := NewMdHandler("SCRIPTS_SECTION", "", scriptsSection, readmePath)
-	return handler.SectionUpdate()
+	// Use mdgo to handle the file update
+	m := mdgo.New(".", ".", func(name string, data []byte) error {
+		return os.WriteFile(name, data, 0644)
+	})
+	m.InputPath(readmePath, func(name string) ([]byte, error) {
+		return os.ReadFile(name)
+	})
+
+	return m.UpdateSection("SCRIPTS_SECTION", scriptsSection)
 }
 
 // UpdateReadmeIfNeeded updates README and returns true if changes were made
@@ -60,9 +68,6 @@ func (dru *DevScriptsReadmeUpdater) UpdateReadmeIfNeeded(readmePath string) (boo
 	if existing, err := os.ReadFile(readmePath); err == nil {
 		currentContent = string(existing)
 	}
-
-	// Create handler and check if section already exists with same content
-	handler := NewMdHandler("SCRIPTS_SECTION", "", scriptsSection, readmePath)
 
 	// Find existing section
 	sectionStart := "<!-- START_SECTION:SCRIPTS_SECTION -->"
@@ -82,8 +87,16 @@ func (dru *DevScriptsReadmeUpdater) UpdateReadmeIfNeeded(readmePath string) (boo
 	}
 
 	// Update the file
-	err = handler.SectionUpdate()
-	return err == nil, err
+	// Update the file using mdgo
+	m := mdgo.New(".", ".", func(name string, data []byte) error {
+		return os.WriteFile(name, data, 0644)
+	})
+	m.InputPath(readmePath, func(name string) ([]byte, error) {
+		return os.ReadFile(name)
+	})
+
+	err = m.UpdateSection("SCRIPTS_SECTION", scriptsSection)
+	return true, err
 }
 
 // BuildMarkdownTable creates a markdown table from script info using the MdTable API
