@@ -13,22 +13,18 @@ scripts commonly used by a developer in his daily workflow
 | `functions.sh`         | Helper functions for git and script execution management                                                              | `source functions.sh`          |
 | `githubutils.sh`       | Utility functions for GitHub repository management and user information retrieval                                     | `source githubutils.sh`        |
 | `gitremtracking.sh`    | Removes files from git tracking both locally and remotely                                                             | `./gitremtracking.sh file1.txt file2.txt` |
-| `gitutils.sh`          | Git utilities for repository initialization and management                                                            | `source gitutils.sh && init_new_repo "my-project" "github.com/username"` |
 | `goaddtest.sh`         | Script to generate Go test files with unit test and benchmark templates                                               | `./goaddtest.sh CreateFile create` |
 | `goget.sh`             | Updates a Go package to its latest tagged version                                                                     | `./goget.sh package-name`      |
 | `gomodrename.sh`       | Rename a Go module and update all its references                                                                      | `./gomodrename.sh old-module-name new-module-name` |
 | `gomodtagupdate.sh`    | Updates Go module versions across all projects that use them                                                          | `./gomodtagupdate.sh <package-name> <new-version>` |
 | `gomodutils.sh`        | Utility functions for managing Go modules and version updates                                                         | `source gomodutils.sh && update_single_go_module "mymodule" "v1.2.3"` |
 | `gopkgupdate.sh`       | Updates Go packages in go.mod to their latest versions from local repositories                                        | `./gopkgupdate.sh`             |
-| `gopu.sh`              | Automated workflow for Go projects: checks modules, updates dependencies, creates tags, backs up and pushes to remote | `gopu.sh "Commit message"`     |
 | `gorenameproject.sh`   | Script to rename a Go project and update its module references                                                        | `./gorenameproject.sh old-project-name new-project-name` |
-| `gotest.sh`            | Run Go tests, vet, race detection and coverage analysis                                                               | `gotest.sh [project_directory]` |
 | `goupgrade.sh`         | Updates Go packages and tidies up module dependencies                                                                 | `./goupgrade.sh`               |
 | `issue.sh`             | Script to manage GitHub issues using functions.sh helpers                                                             | `./issue.sh <command> [args] eg: []./issue.sh + "My issue" bug] | - 4 "Closed by xxx" | ?` |
 | `license.sh`           | Detect license type from LICENSE files                                                                                | `license.sh`                   |
 | `mdutils.sh`           | README.md utility functions for updating sections dynamically                                                         | `./mdutils.sh section_identifier [after_line] new_content [readme_file]` |
 | `parentdir.sh`         | Gets the parent directory of the script's location                                                                    | `source parentdir.sh  parentDir=$(get_parent_dir)` |
-| `pu.sh`                | Script to commit changes, create a new tag, and push to remote                                                        | `./pu.sh "Commit message"`     |
 | `rename.sh`            | Rename a file and update Git tracking                                                                                 | `./rename.sh <current_name> <new_name>` |
 | `repodelete.sh`        | Deletes a remote GitHub repository after confirmation and permission checks                                           | `./repodelete.sh <repo-name> [force_delete] [owner]` |
 | `reporename.sh`        | Renames a repository both locally and on remote GitHub, updates Git remotes                                           | `./reporename.sh <old-name> <new-name>` |
