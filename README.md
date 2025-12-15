@@ -1,5 +1,5 @@
 # DevScripts Package
-scripts commonly used by a developer in his daily workflow
+scripts commonly used by a developer in his daily workflow.
 
 <!-- SCRIPTS_SECTION_START -->
 ## Available Scripts
